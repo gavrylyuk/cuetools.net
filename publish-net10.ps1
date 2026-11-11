@@ -2,14 +2,15 @@
 param(
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Release',
     [switch]$NoBuild,
-    [switch]$SelfContained
+    [switch]$SelfContained,
+    [switch]$Experimental
 )
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 Push-Location $PSScriptRoot
 try {
     if (-not $NoBuild) { & (Join-Path $PSScriptRoot 'build-net10.ps1') -Configuration $Configuration }
-    $distributionName = if ($SelfContained) { 'cuetools-only-self-contained' } else { 'cuetools-only' }
+    $distributionName = if ($Experimental) { 'cuetools-parallel-experimental' } elseif ($SelfContained) { 'cuetools-only-self-contained' } else { 'cuetools-only' }
     $distribution = Join-Path $PSScriptRoot "bin\$Configuration\$distributionName\win-x64"
     $pluginSource = Join-Path $PSScriptRoot "bin\$Configuration\net10.0\plugins"
     $nativeSource = Join-Path $PSScriptRoot $(if ($Configuration -eq 'Debug') { 'ThirdPartyDebug\x64' } else { 'ThirdParty\x64' })
@@ -18,6 +19,7 @@ try {
         $appOutput = Join-Path $distribution $appName
         & dotnet publish $apps[$appName][0] -c $Configuration -f $apps[$appName][1] -r win-x64 --self-contained $SelfContained.IsPresent.ToString().ToLowerInvariant() -p:PublishTrimmed=false -p:PublishSingleFile=false -o $appOutput --nologo
         if ($LASTEXITCODE -ne 0) { throw "Publishing $appName failed with exit code $LASTEXITCODE" }
+        if ($Experimental) { Set-Content -LiteralPath (Join-Path $appOutput 'parallel_experiment') -Value 'Parallel FLAC preview: isolated settings and single-instance identity.' }
         $plugins = Join-Path $appOutput 'plugins'
         New-Item -ItemType Directory -Path $plugins -Force | Out-Null
         # Keep CUETools runtime dependencies intact; omit cached hardware-ripper plugins.

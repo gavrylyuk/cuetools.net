@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 
 namespace CUETools.Processor.Settings
@@ -20,6 +20,14 @@ namespace CUETools.Processor.Settings
 
         public static string GetProfileDir(string appName, string appPath)
         {
+#if NET10_0_OR_GREATER
+            if (File.Exists(Path.Combine(AppContext.BaseDirectory, "parallel_experiment")))
+            {
+                string experimental = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), appName + " Parallel Experimental");
+                Directory.CreateDirectory(experimental);
+                return experimental;
+            }
+#endif
             bool userProfilesEnabled = (appPath == null || File.Exists(Path.Combine(Path.GetDirectoryName(appPath), "user_profiles_enabled")));
             string appDataDir = userProfilesEnabled ?
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) :

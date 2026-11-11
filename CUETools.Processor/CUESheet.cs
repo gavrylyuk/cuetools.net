@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Drawing;
@@ -84,6 +84,10 @@ namespace CUETools.Processor
 
         #endregion
 
+#if NET10_0_OR_GREATER
+        public ParallelConversionBatch ParallelBatch { get; set; }
+        public ParallelFlacSession ParallelSession { get; set; }
+#endif
         #region Properties
 
         public int TrackCount
@@ -3707,6 +3711,9 @@ namespace CUETools.Processor
                 if (audioDest != null)
                     audioDest.Close();
                 audioDest = null;
+#if NET10_0_OR_GREATER
+                if (ParallelSession != null) ParallelSession.Complete();
+#endif
             }
 #if !DEBUG
             catch (Exception ex)
@@ -4110,6 +4117,10 @@ namespace CUETools.Processor
 
         public void CheckStop()
         {
+#if NET10_0_OR_GREATER
+            if (ParallelSession != null) ParallelSession.Checkpoint();
+            else if (ParallelBatch != null) ParallelBatch.Checkpoint();
+#endif
             lock (this)
             {
                 if (_stop)
@@ -4124,6 +4135,9 @@ namespace CUETools.Processor
 
         public void Stop()
         {
+#if NET10_0_OR_GREATER
+            if (ParallelBatch != null) ParallelBatch.Cancel(false);
+#endif
             lock (this)
             {
                 if (_pause)
@@ -4137,6 +4151,9 @@ namespace CUETools.Processor
 
         public void Pause()
         {
+#if NET10_0_OR_GREATER
+            if (ParallelBatch != null) { ParallelBatch.TogglePause(); return; }
+#endif
             lock (this)
             {
                 if (_pause)
@@ -4155,6 +4172,9 @@ namespace CUETools.Processor
         {
             var pcm = new AudioPCMConfig(bps, 2, 44100);
             string extension = Path.GetExtension(path).ToLower();
+#if NET10_0_OR_GREATER
+            if (!noOutput && ParallelSession != null) return ParallelSession.CreateDest(path, pcm, finalSampleCount, padding);
+#endif
             return AudioReadWrite.GetAudioDest(noOutput ? AudioEncoderType.NoAudio : _audioEncoderType, path, pcm, finalSampleCount, padding, extension, _config);
         }
 

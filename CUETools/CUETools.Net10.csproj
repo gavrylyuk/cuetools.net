@@ -20,6 +20,7 @@
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.0" />
     <PackageReference Include="System.Resources.Extensions" Version="10.0.0" />
     <Compile Include="Program.Net10.cs" />
+    <Compile Include="ParallelConversion.Net10.cs" />
     <Compile Include="SingletonController.Net10.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -32,25 +32,36 @@ jobs:
             git apply --directory=$($entry[0]) $entry[1]
             if ($LASTEXITCODE) { exit $LASTEXITCODE }
           }
+      - name: Prepare reference FLAC encoder for integration tests
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force bin/tools | Out-Null
+          Invoke-WebRequest 'https://github.com/xiph/flac/releases/download/1.5.0/flac-1.5.0-win.zip' -OutFile bin/tools/flac.zip
+          if ((Get-FileHash bin/tools/flac.zip -Algorithm SHA256).Hash -ne '53F1500F0D6E7C61379D7FEE50D4A9F7F504C650009506D9BA015530D76C0DDE') { throw 'FLAC archive checksum mismatch' }
+          Expand-Archive bin/tools/flac.zip -DestinationPath bin/tools/flac
+          $encoder = Get-ChildItem bin/tools/flac -Recurse -Filter flac.exe | Where-Object FullName -match 'Win64' | Select-Object -First 1
+          if (-not $encoder) { throw 'Missing x64 reference FLAC encoder' }
+          "CUETOOLS_TEST_FLAC=$($encoder.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
       - name: Build and test x64 Release
         shell: pwsh
         run: ./build-net10.ps1 -Configuration Release
       - name: Publish applications
         shell: pwsh
-        run: ./publish-net10.ps1 -Configuration Release -NoBuild
+        run: ./publish-net10.ps1 -Configuration Release -NoBuild -Experimental
       - name: Build Windows installer
         shell: pwsh
-        run: ./build-installer.ps1 -Configuration Release -NoBuild
+        run: ./build-installer.ps1 -Configuration Release -NoBuild -Experimental
       - uses: actions/upload-artifact@v4
         with:
-          name: CUETools-Setup-win-x64
+          name: CUETools-Parallel-Preview-Setup-win-x64
           path: |
             bin/Release/installer/*-Setup.exe
             bin/Release/installer/*-Setup.exe.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: CUETools-only-net10-win-x64
-          path: bin/Release/cuetools-only/win-x64/CUETools/
+          name: CUETools-Parallel-Preview-win-x64
+          path: bin/Release/cuetools-parallel-experimental/win-x64/CUETools/
       - uses: actions/upload-artifact@v4
         if: always()
         with:

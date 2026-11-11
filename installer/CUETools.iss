@@ -12,16 +12,27 @@
 #endif
 #define RedistVersion GetFileVersion(RedistPath)
 
+#ifndef Variant
+  #define Variant "net10"
+#endif
+#ifdef Experimental
+  #define DisplayName "CUETools Parallel Experimental"
+  #define ProductId "{{FAC3A103-EC01-4D39-B95C-39C9BA7F82CC}"
+#else
+  #define DisplayName "CUETools"
+  #define ProductId "{{DBDAE944-653B-4688-A128-8772C777E6C4}"
+#endif
+
 [Setup]
-AppId={{DBDAE944-653B-4688-A128-8772C777E6C4}
-AppName=CUETools
+AppId={#ProductId}
+AppName={#DisplayName}
 AppVersion={#AppVersion}-net10
-AppVerName=CUETools {#AppVersion} (.NET 10)
+AppVerName={#DisplayName} {#AppVersion} (.NET 10)
 AppPublisher=CUETools contributors / gavrylyuk fork
 AppPublisherURL=https://github.com/gavrylyuk/cuetools.net
 AppSupportURL=https://github.com/gavrylyuk/cuetools.net/issues
-DefaultDirName={autopf}\CUETools
-DefaultGroupName=CUETools
+DefaultDirName={autopf}\{#DisplayName}
+DefaultGroupName={#DisplayName}
 DisableProgramGroupPage=yes
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
@@ -32,7 +43,7 @@ UninstallDisplayIcon={app}\CUETools.exe
 SetupIconFile=..\CUETools\cue2.ico
 LicenseFile=..\GPL.txt
 OutputDir={#OutputDir}
-OutputBaseFilename=CUETools-{#AppVersion}-net10-win-x64-Setup
+OutputBaseFilename=CUETools-{#AppVersion}-{#Variant}-win-x64-Setup
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
@@ -51,9 +62,9 @@ Source: "{#PayloadDir}\*"; DestDir: "{app}"; Excludes: "*.pdb"; Flags: ignorever
 Source: "{#RedistPath}"; DestName: "vc_redist.x64.exe"; Flags: dontcopy
 
 [Icons]
-Name: "{group}\CUETools"; Filename: "{app}\CUETools.exe"; WorkingDir: "{app}"
+Name: "{group}\{#DisplayName}"; Filename: "{app}\CUETools.exe"; WorkingDir: "{app}"
 Name: "{group}\Uninstall CUETools"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\CUETools"; Filename: "{app}\CUETools.exe"; WorkingDir: "{app}"; Tasks: desktopicon
+Name: "{autodesktop}\{#DisplayName}"; Filename: "{app}\CUETools.exe"; WorkingDir: "{app}"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\CUETools.exe"; Description: "Launch CUETools"; Flags: nowait postinstall skipifsilent runasoriginaluser

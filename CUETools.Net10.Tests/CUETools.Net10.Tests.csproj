@@ -12,11 +12,19 @@
     <PackageReference Include="MSTest.TestAdapter" Version="4.5.1" />
     <PackageReference Include="MSTest.TestFramework" Version="4.5.1" />
     <ProjectReference Include="..\CUEControls\CUEControls.Net10.csproj" />
+    <ProjectReference Include="..\CUETools.Codecs.libFLAC\CUETools.Codecs.libFLAC.csproj" />
+    <ProjectReference Include="..\CUETools.Codecs.MACLib\CUETools.Codecs.MACLib.csproj" />
+    <ProjectReference Include="..\CUETools.Codecs.libwavpack\CUETools.Codecs.libwavpack.csproj" />
     <ProjectReference Include="..\CUETools.Processor\CUETools.Processor.csproj" />
     <Compile Include="..\CUETools\SingletonController.Net10.cs" Link="SingletonController.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\$(Configuration)\net10.0\plugins\x64\CUETools.Codecs.TTA.dll" Link="plugins\x64\CUETools.Codecs.TTA.dll" CopyToOutputDirectory="PreserveNewest" Condition="Exists('..\bin\$(Configuration)\net10.0\plugins\x64\CUETools.Codecs.TTA.dll')" />
     <None Include="..\bin\$(Configuration)\net10.0\plugins\x64\Ijwhost.dll" Link="plugins\x64\Ijwhost.dll" CopyToOutputDirectory="PreserveNewest" Condition="Exists('..\bin\$(Configuration)\net10.0\plugins\x64\Ijwhost.dll')" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\ThirdParty\x64\libFLAC_dynamic.dll" Link="libFLAC_dynamic.dll" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\ThirdParty\x64\MACLibDll.dll" Link="MACLibDll.dll" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\ThirdParty\x64\wavpackdll.dll" Link="wavpackdll.dll" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

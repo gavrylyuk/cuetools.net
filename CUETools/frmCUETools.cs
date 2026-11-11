@@ -47,10 +47,23 @@ namespace JDP
 {
     public partial class frmCUETools : Form
     {
+        private Form ConversionDialogOwner
+        {
+            get
+            {
+#if NET10_0_OR_GREATER
+                if (parallelQueue != null && parallelQueue.Visible) return parallelQueue;
+#endif
+                return this;
+            }
+        }
         public frmCUETools()
         {
             _profile = _defaultProfile = new CUEToolsProfile("default");
             InitializeComponent();
+#if NET10_0_OR_GREATER
+            if (File.Exists(Path.Combine(AppContext.BaseDirectory, "parallel_experiment"))) Text += " · Parallel Experimental";
+#endif
             //splitContainer1.AutoScaleMode = AutoScaleMode.Font;
             if (Type.GetType("Mono.Runtime", false) == null)
                 m_icon_mgr = new CUEControls.ShellIconMgr();
@@ -498,7 +511,13 @@ namespace JDP
                 //    InputPath = pathIn;
                 //}
 
+#if NET10_0_OR_GREATER
+                if (!ConfigureParallelConversion(pathIn)) return;
+#endif
                 CUESheet cueSheet = new CUESheet(_profile._config);
+#if NET10_0_OR_GREATER
+                cueSheet.ParallelBatch = parallelBatch;
+#endif
                 cueSheet.PasswordRequired += new EventHandler<CompressionPasswordRequiredEventArgs>(PasswordRequired);
                 cueSheet.CUEToolsProgress += new EventHandler<CUEToolsProgressEventArgs>(SetStatus);
                 cueSheet.CUEToolsSelection += new EventHandler<CUEToolsSelectionEventArgs>(MakeSelection);
@@ -521,6 +540,9 @@ namespace JDP
                 _workThread.Priority = ThreadPriority.BelowNormal;
                 _workThread.IsBackground = true;
                 _workThread.Start(p);
+#if NET10_0_OR_GREATER
+                if (parallelQueue != null && !parallelQueue.Visible) parallelQueue.Show(this);
+#endif
             }
             catch (Exception ex)
             {
@@ -647,6 +669,9 @@ namespace JDP
 
             try
             {
+#if NET10_0_OR_GREATER
+                if (parallelBatch != null) parallelBatch.Preflight(_profile._config);
+#endif
                 if (_profile._config.checkForUpdates && DateTime.UtcNow - lastMOTD > TimeSpan.FromDays(1) && _batchReport.Length == 0)
                 {
                     this.Invoke((MethodInvoker)(() => toolStripStatusLabel1.Text = "Checking for updates..."));
@@ -966,7 +991,7 @@ namespace JDP
                                     true,
                                     true,
                                     _profile._config.advanced.metadataSearch);
-                                dlgRes = dlg.ShowDialog(this);
+                                dlgRes = dlg.ShowDialog(ConversionDialogOwner);
                                 _choiceMaxed = dlg.WindowState == FormWindowState.Maximized;
                                 if (!_choiceMaxed)
                                 {
@@ -1009,13 +1034,21 @@ namespace JDP
                         });
 
                         if (dlgRes == DialogResult.Cancel)
+                        {
+#if NET10_0_OR_GREATER
+                            if (parallelBatch != null) { parallelBatch.Cancel(false); parallelBatch.Finish(); }
+#endif
                             return;
+                        }
 
                         cueSheet.LoadAndResizeAlbumArt();
 
                         cueSheet.GenerateFilenames(audioEncoderType, outputFormat, pathOut);
 
                         List<string> outputExists = cueSheet.OutputExists();
+#if NET10_0_OR_GREATER
+                        string[] parallelOverwriteApproved = outputExists.ToArray();
+#endif
 
                         dlgRes = DialogResult.Cancel;
                         if (outputExists.Count > 0)
@@ -1027,7 +1060,7 @@ namespace JDP
                                     using (frmOverwrite frm = new frmOverwrite())
                                     {
                                         outputExists.ForEach(path => frm.textFiles.AppendText(path + "\n"));
-                                        dlgRes = frm.ShowDialog(this);
+                                        dlgRes = frm.ShowDialog(ConversionDialogOwner);
                                         if (frm.checkBoxRemember.Checked)
                                             overwriteResult = dlgRes;
                                     }
@@ -1042,6 +1075,9 @@ namespace JDP
                             if (outputExists.Count > 0 && _batchPaths.Count == 0)
                             {
                                 cueSheet.Close();
+#if NET10_0_OR_GREATER
+                                if (parallelBatch != null) { parallelBatch.Cancel(false); parallelBatch.Finish(); }
+#endif
                                 return;
                             }
                         }
@@ -1054,7 +1090,11 @@ namespace JDP
                             cueSheet.UsePregapForFirstTrackInSingleFile = _usePregapForFirstTrackInSingleFile && !outputAudio;
                             if (script == null || script.name == "default")
                             {
+#if NET10_0_OR_GREATER
+                                status = parallelBatch == null ? cueSheet.Go() : RunParallelAlbum(cueSheet, pathIn, pathOut, parallelOverwriteApproved, audioEncoderType, outputFormat);
+#else
                                 status = cueSheet.Go();
+#endif
                                 if (cueSheet.Config.advanced.CTDBSubmit
                                     && useAR
                                     && useCUEToolsDB
@@ -1143,6 +1183,9 @@ namespace JDP
                             //reportForm.ShowDialog(this);
                         }
                         else
+#if NET10_0_OR_GREATER
+                            if (parallelBatch == null)
+#endif
                             ShowFinishedMessage(cueSheet.PaddedToFrame, status);
                         SetupControls(false);
                     }
@@ -1154,12 +1197,19 @@ namespace JDP
 #if !DEBUG
             catch (Exception ex)
             {
+#if NET10_0_OR_GREATER
+                if (parallelBatch != null) parallelBatch.FailAlbum(pathIn, ex);
+#endif
                 if (_batchPaths.Count == 0)
                 {
                     this.Invoke((MethodInvoker)delegate()
                     {
                         SetupControls(false);
+#if NET10_0_OR_GREATER
+                        if (parallelBatch == null) ShowErrorMessage(ex);
+#else
                         ShowErrorMessage(ex);
+#endif
                     });
                 }
                 else
@@ -1183,11 +1233,17 @@ namespace JDP
                 this.Invoke((MethodInvoker)delegate()
                 {
                     SetupControls(false);
+#if NET10_0_OR_GREATER
+                    if (parallelBatch == null)
+#endif
                     MessageBox.Show(this, "Conversion was stopped.", "Stopped", MessageBoxButtons.OK,
                         MessageBoxIcon.Exclamation);
                 });
             }
             cueSheet.Close();
+#if NET10_0_OR_GREATER
+            if (parallelBatch != null && _batchPaths.Count <= 1) parallelBatch.Finish();
+#endif
 
             if (_batchPaths.Count != 0)
             {
@@ -1217,6 +1273,9 @@ namespace JDP
 
         public void SetStatus(object sender, CUEToolsProgressEventArgs e)
         {
+#if NET10_0_OR_GREATER
+            if (parallelBatch != null && parallelInput != null) parallelBatch.ReportSource(parallelInput, e);
+#endif
             if (e.percent == 0)
                 _startedAt = DateTime.Now;
             this.BeginInvoke((MethodInvoker)delegate()
@@ -1242,6 +1301,9 @@ namespace JDP
                 toolStripStatusLabel1.Text = e.status.Replace("&", "&&");
                 toolStripStatusLabel1.ToolTipText = e.status;
                 toolStripProgressBar2.Value = Math.Max(0, Math.Min(100, (int)(e.percent * 100)));
+#if NET10_0_OR_GREATER
+                UpdateParallelStatus();
+#endif
 
                 toolStripStatusLabelAR.Enabled = e.cueSheet != null && e.cueSheet.ArVerify != null && e.cueSheet.ArVerify.ARStatus == null;
                 toolStripStatusLabelAR.Text = e.cueSheet != null && e.cueSheet.ArVerify != null && e.cueSheet.ArVerify.ExceptionStatus == WebExceptionStatus.Success ? e.cueSheet.ArVerify.WorstTotal().ToString() : "";
@@ -2278,7 +2340,7 @@ namespace JDP
                 dlg.WindowState = FormWindowState.Maximized;
             dlg.CUE = CueSheet;
             dlg.LookupAlbumInfo(true, node is FileSystemTreeNodeLocalDBEntry, true, _profile._config.advanced.metadataSearch);
-            var dlgRes = dlg.ShowDialog(this);
+            var dlgRes = dlg.ShowDialog(ConversionDialogOwner);
             _choiceMaxed = dlg.WindowState == FormWindowState.Maximized;
             if (!_choiceMaxed)
             {

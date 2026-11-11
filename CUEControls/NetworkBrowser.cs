@@ -56,7 +56,7 @@ namespace CUEControls
         internal static readonly NetworkLocationsStore Store = new NetworkLocationsStore(
             System.IO.Path.Combine(File.Exists(System.IO.Path.Combine(Application.StartupPath, "user_profiles_enabled"))
                 ? Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) : Application.StartupPath,
-                "CUE Tools", "network-locations.txt"));
+                File.Exists(System.IO.Path.Combine(AppContext.BaseDirectory, "parallel_experiment")) ? "CUE Tools Parallel Experimental" : "CUE Tools", "network-locations.txt"));
 
         // Shell automation must run on an STA thread. Only plain path strings cross back to the UI.
         internal static string[] Discover(string server)
