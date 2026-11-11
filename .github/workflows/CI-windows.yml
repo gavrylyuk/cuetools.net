@@ -15,14 +15,14 @@ jobs:
   build:
     strategy:
       matrix:
-        # https://github.com/actions/virtual-environments/blob/master/images/win/Windows2022-Readme.md
-        os: [windows-2022]
+        # https://github.com/actions/virtual-environments/blob/master/images/win/Windows2025-VS2026-Readme.md
+        os: [windows-2025]
       fail-fast: true
     runs-on: ${{ matrix.os }}
     env:
       # yamllint disable-line rule:line-length
-      DEVENV_PATH: C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\devenv.com
-      MSBUILD_PATH: C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe
+      DEVENV_PATH: C:\Program Files\Microsoft Visual Studio\18\Enterprise\Common7\IDE\devenv.com
+      MSBUILD_PATH: C:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin\MSBuild.exe
       SLN_PATH: CUETools.sln
     steps:
       - uses: actions/checkout@v4
@@ -37,6 +37,7 @@ jobs:
           git apply --directory=ThirdParty/taglib-sharp ThirdParty/submodule_taglib-sharp_CUETools.patch --verbose
           git apply --directory=ThirdParty/WavPack ThirdParty/submodule_WavPack_CUETools.patch --verbose
           git apply --directory=ThirdParty/WindowsMediaLib ThirdParty/submodule_WindowsMediaLib_CUETools.patch --verbose
+          git apply --directory=ThirdParty/openclnet ThirdParty/submodule_openclnet_net10.patch --verbose
       - name: MSBuild NuGet restore
         run: |
           "%MSBUILD_PATH%" "%SLN_PATH%" -t:restore -p:Configuration=Release

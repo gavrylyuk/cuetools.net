@@ -1,0 +1,49 @@
+name: CI-net10-windows
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Prepare third-party sources
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          git apply --directory=ThirdParty/flac ThirdParty/submodule_flac_CUETools.patch --whitespace=nowarn
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          Expand-Archive ThirdParty/MAC_SDK/MAC_1086_SDK.zip -DestinationPath ThirdParty/MAC_SDK/
+          foreach ($entry in @(
+            @('ThirdParty/MAC_SDK', 'ThirdParty/ThirdParty_MAC_SDK_CUETools.patch'),
+            @('ThirdParty/taglib-sharp', 'ThirdParty/submodule_taglib-sharp_CUETools.patch'),
+            @('ThirdParty/WavPack', 'ThirdParty/submodule_WavPack_CUETools.patch'),
+            @('ThirdParty/WindowsMediaLib', 'ThirdParty/submodule_WindowsMediaLib_CUETools.patch'),
+            @('ThirdParty/openclnet', 'ThirdParty/submodule_openclnet_net10.patch')
+          )) {
+            git apply --directory=$($entry[0]) $entry[1]
+            if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          }
+      - name: Build and test x64 Release
+        shell: pwsh
+        run: ./build-net10.ps1 -Configuration Release
+      - name: Publish applications
+        shell: pwsh
+        run: ./publish-net10.ps1 -Configuration Release -NoBuild
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CUETools-net10-win-x64
+          path: bin/Release/net10-dist/win-x64/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: net10-test-results
+          path: bin/TestResults/net10-Release/*.trx

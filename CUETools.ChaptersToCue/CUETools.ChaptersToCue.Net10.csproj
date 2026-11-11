@@ -1,0 +1,35 @@
+<Project>
+  <PropertyGroup>
+    <BaseIntermediateOutputPath>obj\Net10\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>CUETools.ChaptersToCue</AssemblyName>
+    <RootNamespace>CUETools.ChaptersToCue</RootNamespace>
+    <OutputType>Exe</OutputType>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <OutputPath>..\bin\$(Configuration)\$(TargetFramework)\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CUETools.CDImage\CUETools.CDImage.csproj" />
+    <ProjectReference Include="..\CUETools.CTDB.Types\CUETools.CTDB.Types.csproj" />
+    <ProjectReference Include="..\CUETools.CTDB\CUETools.CTDB.csproj" />
+    <ProjectReference Include="..\CUETools.Codecs\CUETools.Codecs.csproj" />
+    <ProjectReference Include="..\ThirdParty\taglib-sharp\src\TaglibSharp\TaglibSharp.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <GlobalAnalyzerConfigFiles Include="..\Net10.globalconfig" />
+  </ItemGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+</Project>

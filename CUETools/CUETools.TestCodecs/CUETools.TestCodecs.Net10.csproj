@@ -1,0 +1,94 @@
+<Project>
+  <PropertyGroup>
+    <BaseIntermediateOutputPath>obj\Net10\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <AssemblyName>CUETools.TestCodecs</AssemblyName>
+    <RootNamespace>CUETools.TestCodecs</RootNamespace>
+    <OutputType>Library</OutputType>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <OutputPath>..\..\bin\$(Configuration)\$(TargetFramework)\tests\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <UseWindowsForms>true</UseWindowsForms>
+    <IsTestProject>true</IsTestProject>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="CSScriptLibrary.v1.1, Version=2.3.2.0, Culture=neutral">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\ThirdParty\CSScriptLibrary.v1.1.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AccurateRipVerifyTest.cs" />
+    <Compile Include="ALACWriterTest.cs" />
+    <Compile Include="BitWriterTest.cs" />
+    <Compile Include="CodecsTest.cs" />
+    <Compile Include="Crc32Test.cs" />
+    <Compile Include="FlacWriterTest.cs" />
+    <Compile Include="FlakeWriterTest.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SOXResamplerTest.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\CUETools.AccurateRip\CUETools.AccurateRip.csproj" />
+    <ProjectReference Include="..\..\CUETools.CDImage\CUETools.CDImage.csproj" />
+    <ProjectReference Include="..\..\CUETools.Codecs.ALAC\CUETools.Codecs.ALAC.csproj" />
+    <ProjectReference Include="..\..\CUETools.Codecs.Flake\CUETools.Codecs.Flake.csproj" />
+    <ProjectReference Include="..\..\CUETools.Codecs.libFLAC\CUETools.Codecs.libFLAC.csproj" />
+    <ProjectReference Include="..\..\CUETools.Codecs.LossyWAV\CUETools.Codecs.LossyWAV.csproj" />
+    <ProjectReference Include="..\..\CUETools.Codecs\CUETools.Codecs.csproj" />
+    <ProjectReference Include="..\..\CUETools.Compression\CUETools.Compression.csproj" />
+    <ProjectReference Include="..\..\CUETools.DSP.Resampler\CUETools.DSP.Resampler.csproj" />
+    <ProjectReference Include="..\..\CUETools.Ripper\CUETools.Ripper.csproj" />
+    <ProjectReference Include="..\..\CUETools.TestHelpers\CUETools.TestHelpers.csproj" />
+    <ProjectReference Include="..\..\Freedb\Freedb.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Data\alac.m4a">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\flacwriter1.flac">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\flake.flac">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\hires1.flac">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\hires1.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\pipe.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\test.flac">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\test.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <GlobalAnalyzerConfigFiles Include="..\..\Net10.globalconfig" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.0" />
+    <PackageReference Include="System.Resources.Extensions" Version="10.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="4.5.1" />
+    <PackageReference Include="MSTest.TestFramework" Version="4.5.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Update="Data\*">
+      <TargetPath>%(Filename)%(Extension)</TargetPath>
+    </Content>
+    <None Include="..\..\ThirdPartyDebug\x64\libFLAC_dynamic.dll" Condition="'$(Configuration)' == 'Debug' and Exists('..\..\ThirdPartyDebug\x64\libFLAC_dynamic.dll')" Link="libFLAC_dynamic.dll" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\ThirdParty\x64\libFLAC_dynamic.dll" Condition="'$(Configuration)' == 'Release' and Exists('..\..\ThirdParty\x64\libFLAC_dynamic.dll')" Link="libFLAC_dynamic.dll" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+</Project>

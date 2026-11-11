@@ -1,0 +1,41 @@
+<Project>
+  <PropertyGroup>
+    <BaseIntermediateOutputPath>obj\Net10\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <AssemblyName>TestRipper</AssemblyName>
+    <RootNamespace>TestRipper</RootNamespace>
+    <OutputType>Library</OutputType>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <OutputPath>..\..\bin\$(Configuration)\$(TargetFramework)\tests\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <IsTestProject>true</IsTestProject>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="CDDriveReaderTest.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Bwg.Logging\Bwg.Logging.csproj" />
+    <ProjectReference Include="..\..\Bwg.Scsi\Bwg.Scsi.csproj" />
+    <ProjectReference Include="..\..\CUETools.CDImage\CUETools.CDImage.csproj" />
+    <ProjectReference Include="..\..\CUETools.Codecs\CUETools.Codecs.csproj" />
+    <ProjectReference Include="..\..\CUETools.Ripper.SCSI\CUETools.Ripper.SCSI.csproj" />
+    <ProjectReference Include="..\..\CUETools.Ripper\CUETools.Ripper.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <GlobalAnalyzerConfigFiles Include="..\..\Net10.globalconfig" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="4.5.1" />
+    <PackageReference Include="MSTest.TestFramework" Version="4.5.1" />
+  </ItemGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+</Project>

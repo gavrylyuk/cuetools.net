@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net47;net20;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net47;net20;netstandard2.0;net10.0</TargetFrameworks>
     <Version>2.2.6.0</Version>
     <AssemblyName>CUETools.Codecs.Flake</AssemblyName>
     <RootNamespace>CUETools.Codecs.Flake</RootNamespace>

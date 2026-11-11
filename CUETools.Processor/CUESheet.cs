@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Drawing;
-#if NET47 || NET20
+#if NET47 || NET20 || (NET10_0_OR_GREATER && WINDOWS)
 using System.Drawing.Drawing2D;
 #endif
 using System.Globalization;
@@ -127,7 +127,7 @@ namespace CUETools.Processor
             get { return _albumArt; }
         }
 
-#if NET47 || NET20
+#if NET47 || NET20 || (NET10_0_OR_GREATER && WINDOWS)
         public Image Cover
         {
             get
@@ -1828,7 +1828,7 @@ namespace CUETools.Processor
                             using (MemoryStream imageStream = new MemoryStream(pic.Data.Data, 0, pic.Data.Count))
                                 try
                                 {
-#if NET47 || NET20
+#if NET47 || NET20 || (NET10_0_OR_GREATER && WINDOWS)
                                     var image = Image.FromStream(ms);
                                     pic.Description += $" ({image.Width}x{image.Height})";
                                     //if (image.Height > 0 && image.Width > 0 && (image.Height * 1.0 / image.Width) > 0.9 && (image.Width * 1.0 / image.Height) > 0.9)
@@ -1863,7 +1863,7 @@ namespace CUETools.Processor
                     }
                 }
             }
-#if NET47 || NET20
+#if NET47 || NET20 || (NET10_0_OR_GREATER && WINDOWS)
             ResizeAlbumArt();
 #endif
         }
@@ -1922,35 +1922,33 @@ namespace CUETools.Processor
         {
             get
             {
-                return Encoding.Default;
+                return CUETools.Codecs.AudioTextEncoding.Ansi;
             }
         }
 
         public static StreamReader StreamReader_UTF_ANSI(string path)
         {
-            // StreamReader() detects the encoding of files properly, if a BOM is present.
-            // Enable detection of UTF-8 files without BOM. Otherwise fall back to default encoding, which is typically ANSI.
+            var reader = new StreamReader(path,
+                new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true),
+                detectEncodingFromByteOrderMarks: true);
             try
             {
-                // Check first for a BOM, else try with UTF-8. This allows detection of UTF-8 encoded files without BOM.
-                var sr = new StreamReader(path, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true), detectEncodingFromByteOrderMarks: true);
-                // Read the file, to detect the encoding
-                sr.ReadToEnd();
-                sr.BaseStream.Position = sr.CurrentEncoding.GetPreamble().Length; // Return StreamReader to Beginning, with or without BOM
-                sr.DiscardBufferedData();
-                return sr;
+                reader.ReadToEnd();
+                reader.BaseStream.Position = reader.CurrentEncoding.GetPreamble().Length;
+                reader.DiscardBufferedData();
+                return reader;
             }
             catch (DecoderFallbackException)
             {
-                // Use Encoding.Default (typically ANSI)
-                var sr = new StreamReader(path, Encoding.Default);
-                sr.ReadToEnd();
-                sr.BaseStream.Position = 0;
-                sr.DiscardBufferedData();
-                return sr;
+                reader.Dispose();
+                return new StreamReader(path, CUETools.Codecs.AudioTextEncoding.Ansi);
+            }
+            catch
+            {
+                reader.Dispose();
+                throw;
             }
         }
-
         internal CUEToolsSourceFile ChooseFile(List<CUEToolsSourceFile> sourceFiles, string defaultFileName, bool quietIfSingle)
         {
             if (sourceFiles.Count <= 0)
@@ -3030,7 +3028,7 @@ namespace CUETools.Processor
             return entry;
         }
 
-#if NET47 || NET20
+#if NET47 || NET20 || (NET10_0_OR_GREATER && WINDOWS)
         private static Bitmap resizeImage(Image imgToResize, Size size)
         {
             int sourceWidth = imgToResize.Width;
@@ -3152,7 +3150,7 @@ namespace CUETools.Processor
                     using (MemoryStream imageStream = new MemoryStream(pic.Data.Data, 0, pic.Data.Count))
                         try
                         {
-#if NET47 || NET20
+#if NET47 || NET20 || (NET10_0_OR_GREATER && WINDOWS)
                             var image = Image.FromStream(imageStream);
                             pic.Description += $" ({image.Width}x{image.Height})";
                             if (image.Height > 0 && image.Width > 0 && (image.Height * 1.0 / image.Width) > 0.9 && (image.Width * 1.0 / image.Height) > 0.9)
@@ -3170,7 +3168,7 @@ namespace CUETools.Processor
             }
         }
 
-#if NET47 || NET20
+#if NET47 || NET20 || (NET10_0_OR_GREATER && WINDOWS)
         public void ResizeAlbumArt()
         {
             if (_albumArt == null)

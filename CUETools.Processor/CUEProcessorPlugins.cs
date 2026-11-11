@@ -61,7 +61,11 @@ namespace CUETools.Processor
         private static void AddPlugin(string plugin_path)
         {
             AssemblyName name = AssemblyName.GetAssemblyName(plugin_path);
+#if NET10_0_OR_GREATER
+            Assembly assembly = Assembly.LoadFrom(Path.GetFullPath(plugin_path));
+#else
             Assembly assembly = Assembly.Load(name);
+#endif
             System.Diagnostics.Trace.WriteLine("Loaded " + assembly.FullName);
             foreach (Type type in assembly.GetExportedTypes())
             {

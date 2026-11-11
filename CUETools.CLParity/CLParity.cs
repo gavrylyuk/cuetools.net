@@ -1,4 +1,4 @@
-/**
+﻿/**
  * CUETools.CLParity: Reed-Solomon (32 bit) using OpenCL
  * Copyright (c) 2009-2025 Gregory S. Chudov
  *
@@ -27,10 +27,17 @@ using System.Text;
 using System.Runtime.InteropServices;
 using CUETools.Codecs;
 using OpenCLNet;
+#if NET10_0_OR_GREATER
+using Program = OpenCLNet.CLProgram;
+using CUETools.Codecs.FLACCL;
+#endif
 
 namespace CUETools.CLParity
 {
     public class CLParitySettings
+#if NET10_0_OR_GREATER
+        : IAudioEncoderSettings
+#endif
     {
 		public CLParitySettings() 
         { 
@@ -39,6 +46,20 @@ namespace CUETools.CLParity
             this.DeviceType = OpenCLDeviceType.GPU;
         }
 
+#if NET10_0_OR_GREATER
+        public string Name => "CLParity";
+        public string Extension => "bin";
+        public Type EncoderType => typeof(CLParityWriter);
+        public bool Lossless => false;
+        public int Priority => 0;
+        public string SupportedModes => "";
+        public string DefaultMode => "";
+        public string EncoderMode { get; set; } = "";
+        public AudioPCMConfig PCM { get; set; } = AudioPCMConfig.RedBook;
+        public int BlockSize { get; set; }
+        public int Padding { get; set; }
+        public IAudioEncoderSettings Clone() => (CLParitySettings)MemberwiseClone();
+#endif
         [DefaultValue(false)]
         [SRDescription(typeof(Properties.Resources), "DescriptionMappedMemory")]
         public bool MappedMemory { get; set; }
@@ -123,6 +144,9 @@ namespace CUETools.CLParity
         public CLParityWriter(string path, Stream IO, AudioPCMConfig pcm)
         {
             _pcm = pcm;
+#if NET10_0_OR_GREATER
+            _settings.PCM = pcm;
+#endif
             if (pcm.BitsPerSample != 16)
                 throw new Exception("Bits per sample must be 16.");
             if (pcm.ChannelCount != 2)
@@ -138,7 +162,11 @@ namespace CUETools.CLParity
 
 		internal CLParitySettings _settings = new CLParitySettings();
 
+#if NET10_0_OR_GREATER
+        public IAudioEncoderSettings Settings
+#else
         public object Settings
+#endif
         {
             get
             {

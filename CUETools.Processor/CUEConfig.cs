@@ -568,7 +568,7 @@ namespace CUETools.Processor
             char[] invalid = Path.GetInvalidFileNameChars();
 
             if (filenamesANSISafe)
-                s = Encoding.Default.GetString(Encoding.Default.GetBytes(s));
+                s = CUETools.Codecs.AudioTextEncoding.Ansi.GetString(CUETools.Codecs.AudioTextEncoding.Ansi.GetBytes(s));
 
             for (int i = 0; i < s.Length; i++)
             {

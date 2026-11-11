@@ -1,0 +1,38 @@
+<Project>
+  <!-- Reference assembly packages support compilation without the legacy CLR runtime.
+       Full-framework MSBuild otherwise checks for the .NET 3.5 SP1 runtime even
+       when the .NET 2.0 reference assemblies have already been supplied. -->
+  <Target Name="UseNet20ReferenceAssembliesWithoutRuntime"
+          BeforeTargets="GetReferenceAssemblyPaths"
+          Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and
+                     '$(TargetFrameworkVersion)' == 'v2.0' and
+                     Exists('$(TargetFrameworkRootPath)\.NETFramework\v2.0\mscorlib.dll')">
+    <PropertyGroup>
+      <BypassFrameworkInstallChecks>true</BypassFrameworkInstallChecks>
+      <!-- Use the SDK compiler for satellites and the current resource task to avoid CLR 2.0 tools. -->
+      <GenerateSatelliteAssembliesForCore>true</GenerateSatelliteAssembliesForCore>
+      <ResGenExecuteAsTool>false</ResGenExecuteAsTool>
+      <GenerateResourceMSBuildRuntime Condition="'$(GenerateResourceMSBuildRuntime)' == ''">CurrentRuntime</GenerateResourceMSBuildRuntime>
+    </PropertyGroup>
+  </Target>
+  <ItemDefinitionGroup Condition="'$(TargetFramework)' == 'net10.0' or '$(TargetFramework)' == 'net10.0-windows'">
+    <ProjectReference>
+      <Private>true</Private>
+    </ProjectReference>
+    <Reference>
+      <Private>true</Private>
+    </Reference>
+  </ItemDefinitionGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0' or '$(TargetFramework)' == 'net10.0-windows'">
+    <!-- Modern application dependency manifests require local runtime dependencies. -->
+    <ProjectReference Update="@(ProjectReference)" Private="true" />
+    <Reference Update="@(Reference)" Private="true" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0' or '$(TargetFramework)' == 'net10.0-windows'">
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows' and '$(GenerateAssemblyInfo)' == 'false'">
+    <!-- Legacy AssemblyInfo files omit the SDK-generated Windows platform annotation. -->
+    <Compile Include="$(MSBuildThisFileDirectory)Net10.Windows.cs" Link="Properties\Net10.Windows.cs" />
+  </ItemGroup>
+</Project>

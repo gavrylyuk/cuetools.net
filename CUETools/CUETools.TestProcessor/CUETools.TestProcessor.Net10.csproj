@@ -1,0 +1,51 @@
+<Project>
+  <PropertyGroup>
+    <BaseIntermediateOutputPath>obj\Net10\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <AssemblyName>CUETools.TestProcessor</AssemblyName>
+    <RootNamespace>CUETools.TestProcessor</RootNamespace>
+    <OutputType>Library</OutputType>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <OutputPath>..\..\bin\$(Configuration)\$(TargetFramework)\tests\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <UseWindowsForms>true</UseWindowsForms>
+    <IsTestProject>true</IsTestProject>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="FileGroupInfoTest.cs" />
+    <Compile Include="ProcessorTest.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\CUETools.AccurateRip\CUETools.AccurateRip.csproj" />
+    <ProjectReference Include="..\..\CUETools.CDImage\CUETools.CDImage.csproj" />
+    <ProjectReference Include="..\..\CUETools.Codecs.LossyWAV\CUETools.Codecs.LossyWAV.csproj" />
+    <ProjectReference Include="..\..\CUETools.Codecs\CUETools.Codecs.csproj" />
+    <ProjectReference Include="..\..\CUETools.Compression\CUETools.Compression.csproj" />
+    <ProjectReference Include="..\..\CUETools.CTDB.Types\CUETools.CTDB.Types.csproj" />
+    <ProjectReference Include="..\..\CUETools.CTDB\CUETools.CTDB.csproj" />
+    <ProjectReference Include="..\..\CUETools.Processor\CUETools.Processor.csproj" />
+    <ProjectReference Include="..\..\CUETools.Ripper\CUETools.Ripper.csproj" />
+    <ProjectReference Include="..\..\Freedb\Freedb.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <GlobalAnalyzerConfigFiles Include="..\..\Net10.globalconfig" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.0" />
+    <PackageReference Include="System.Resources.Extensions" Version="10.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="4.5.1" />
+    <PackageReference Include="MSTest.TestFramework" Version="4.5.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Test Images\**\*" CopyToOutputDirectory="PreserveNewest">
+      <TargetPath>%(RecursiveDir)%(Filename)%(Extension)</TargetPath>
+    </Content>
+  </ItemGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+</Project>

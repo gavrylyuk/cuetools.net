@@ -290,7 +290,7 @@ namespace CUETools.CTDB.EACPlugin
             if (src.source != "freedb")
                 return null;
             Encoding iso = Encoding.GetEncoding("iso-8859-1", new EncoderExceptionFallback(), new DecoderExceptionFallback());
-            Encoding def = Encoding.GetEncoding(Encoding.Default.CodePage, new EncoderExceptionFallback(), new DecoderExceptionFallback());
+            Encoding def = Encoding.GetEncoding(CUETools.Codecs.AudioTextEncoding.Ansi.CodePage, new EncoderExceptionFallback(), new DecoderExceptionFallback());
             bool different = false;
             bool error = false;
             var metadata = new CTDBResponseMeta(src);

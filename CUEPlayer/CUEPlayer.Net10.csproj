@@ -1,0 +1,185 @@
+<Project>
+  <PropertyGroup>
+    <BaseIntermediateOutputPath>obj\Net10\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <AssemblyName>CUEPlayer</AssemblyName>
+    <RootNamespace>CUEPlayer</RootNamespace>
+    <OutputType>WinExe</OutputType>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <OutputPath>..\bin\$(Configuration)\$(TargetFramework)\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Browser.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Browser.Designer.cs">
+      <DependentUpon>Browser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DataSet1.Generated.Net10.cs">
+      <DependentUpon>DataSet1.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="Deck.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Deck.Designer.cs">
+      <DependentUpon>Deck.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmCUEPlayer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmCUEPlayer.Designer.cs">
+      <DependentUpon>frmCUEPlayer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Icecast.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Icecast.Designer.cs">
+      <DependentUpon>Icecast.cs</DependentUpon>
+    </Compile>
+    <Compile Include="IcecastSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="IcecastSettings.Designer.cs">
+      <DependentUpon>IcecastSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Output.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Output.Designer.cs">
+      <DependentUpon>Output.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Playlist.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Playlist.Designer.cs">
+      <DependentUpon>Playlist.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.Net10.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Browser.resx">
+      <DependentUpon>Browser.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Deck.resx">
+      <DependentUpon>Deck.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmCUEPlayer.resx">
+      <DependentUpon>frmCUEPlayer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Icecast.resx">
+      <DependentUpon>Icecast.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="IcecastSettings.resx">
+      <DependentUpon>IcecastSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Output.resx">
+      <DependentUpon>Output.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Playlist.resx">
+      <DependentUpon>Playlist.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="Settings.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CUEControls\CUEControls.Net10.csproj" />
+    <ProjectReference Include="..\CUETools.CDImage\CUETools.CDImage.csproj" />
+    <ProjectReference Include="..\CUETools.Codecs.CoreAudio\CUETools.Codecs.CoreAudio.csproj" />
+    <ProjectReference Include="..\CUETools.Codecs.Icecast\CUETools.Codecs.Icecast.csproj" />
+    <ProjectReference Include="..\CUETools.Codecs\CUETools.Codecs.csproj" />
+    <ProjectReference Include="..\CUETools.DSP.Mixer\CUETools.DSP.Mixer.csproj" />
+    <ProjectReference Include="..\CUETools.DSP.Resampler\CUETools.DSP.Resampler.csproj" />
+    <ProjectReference Include="..\CUETools.Processor\CUETools.Processor.csproj" />
+    <ProjectReference Include="..\ProgressODoom\ProgressODoom.Net10.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\control_play_blue.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\control_stop_blue.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\control_pause_blue.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\control_end_blue.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\control_start_blue.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\control_eject.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\control_eject_blue.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\control_fastforward_blue.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\control_repeat_blue.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\control_rewind_blue.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="DataSet1.xsc">
+      <DependentUpon>DataSet1.xsd</DependentUpon>
+    </None>
+    <None Include="DataSet1.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+    </None>
+    <None Include="DataSet1.xss">
+      <DependentUpon>DataSet1.xsd</DependentUpon>
+    </None>
+    <None Include="Properties\DataSources\frmCUEPlayer.datasource" />
+    <None Include="Resources\control_equalizer_blue.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="CUEPlayer.sdf"></Content>
+    <None Include="Properties\DataSources\CUETools.Codecs.Icecast.IcecastSettingsData.datasource" />
+    <None Include="Resources\transmit.ico" />
+    <None Include="Resources\cog.png" />
+    <None Include="Properties\DataSources\Output.datasource" />
+    <None Include="Resources\sound_mute.png" />
+    <None Include="Resources\sound.png" />
+    <None Include="Resources\transmit_blue.png" />
+    <None Include="Resources\ctdb.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <GlobalAnalyzerConfigFiles Include="..\Net10.globalconfig" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.0" />
+    <PackageReference Include="System.Resources.Extensions" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.13" />
+    <!-- Pin the patched native SQLite bundle rather than the provider minimum. -->
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.14" />
+    <Compile Include="PlaylistTableAdapter.Net10.cs" />
+  </ItemGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+</Project>

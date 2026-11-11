@@ -1,0 +1,4 @@
+is_global = true
+# Existing controls need explicit designer-serialization annotations before designer migration is complete.
+# Keep these diagnostics visible while validating runtime compatibility.
+dotnet_diagnostic.WFO1000.severity = warning

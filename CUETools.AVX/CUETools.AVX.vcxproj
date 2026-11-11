@@ -137,6 +137,17 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
+  <!-- This DLL supplies its own CRT entry point and has no CRT dependencies.
+       Debug instrumentation must not introduce CRT startup requirements. -->
+  <ItemDefinitionGroup Condition="'$(Configuration)' == 'Debug'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <SupportJustMyCode>false</SupportJustMyCode>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+    </ClCompile>
+    <Link><IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries></Link>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CUETools.AVX.c" />
   </ItemGroup>

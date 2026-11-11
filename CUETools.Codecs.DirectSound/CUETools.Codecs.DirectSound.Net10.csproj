@@ -1,0 +1,19 @@
+<Project>
+  <PropertyGroup><BaseIntermediateOutputPath>obj\Net10\</BaseIntermediateOutputPath></PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>CUETools.Codecs.DirectSound</AssemblyName>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <OutputPath>..\bin\$(Configuration)\net10.0-windows\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="DirectSoundOut.Net10.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <ProjectReference Include="..\CUETools.Codecs.CoreAudio\CUETools.Codecs.CoreAudio.csproj" />
+  </ItemGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+</Project>

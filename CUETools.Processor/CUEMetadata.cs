@@ -334,7 +334,7 @@ namespace CUETools.Processor
 		public bool FreedbToEncoding()
 		{
 			Encoding iso = Encoding.GetEncoding("iso-8859-1", new EncoderExceptionFallback(), new DecoderExceptionFallback());
-			Encoding def = Encoding.GetEncoding(Encoding.Default.CodePage, new EncoderExceptionFallback(), new DecoderExceptionFallback());
+			Encoding def = Encoding.GetEncoding(CUETools.Codecs.AudioTextEncoding.Ansi.CodePage, new EncoderExceptionFallback(), new DecoderExceptionFallback());
 			bool different = false;
 			bool error = false;
 			Artist = FreedbToEncoding(iso, def, ref different, ref error, Artist);

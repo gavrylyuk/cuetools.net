@@ -78,6 +78,8 @@ namespace TTALib
 		data_pos = 0;
 		encoder_init(tta, num_chan, byte_size);
 		fframes--;
+		// The first frame can also be the final partial frame.
+		if (!fframes && lastlen) framelen = lastlen;
 
 		max_bytes = (num_chan * byte_size * ttahdr.DataLength) >> is_float;
 	}
