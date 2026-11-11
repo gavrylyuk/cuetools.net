@@ -39,7 +39,7 @@ try {
     $output = Join-Path $PSScriptRoot "bin/$Configuration/installer"
     New-Item -ItemType Directory -Path $output -Force | Out-Null
     $version = [Diagnostics.FileVersionInfo]::GetVersionInfo((Join-Path $payload 'CUETools.dll'))
-    $appVersion = "$($version.FileMajorPart).$($version.FileMinorPart).$($version.FileBuildPart)"
+    $appVersion = "$($version.FileMajorPart).$($version.FileMinorPart).$($version.FileBuildPart).$($version.FilePrivatePart)"
     & $InnoCompiler "/DPayloadDir=$payload" "/DRedistPath=$redist" "/DOutputDir=$output" "/DAppVersion=$appVersion" (Join-Path $PSScriptRoot 'installer/CUETools.iss')
     if ($LASTEXITCODE -ne 0) { throw "Installer compilation failed: $LASTEXITCODE" }
     $installer = Join-Path $output "CUETools-$appVersion-net10-win-x64-Setup.exe"

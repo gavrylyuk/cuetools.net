@@ -526,13 +526,13 @@ namespace JDP
         private void buttonMusicBrainz_Click(object sender, EventArgs e)
         {
             if (CUE == null) return;
-            System.Diagnostics.Process.Start($"http://musicbrainz.org/bare/cdlookup.html?toc={CUE.TOC.MusicBrainzTOC}");
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo($"http://musicbrainz.org/bare/cdlookup.html?toc={CUE.TOC.MusicBrainzTOC}") { UseShellExecute = true });
         }
 
         private void buttonNavigateCTDB_Click(object sender, EventArgs e)
         {
             if (CUE == null) return;
-            System.Diagnostics.Process.Start($"http://{config.advanced.CTDBServer}/?tocid={CUE.TOC.TOCID}");
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo($"http://{config.advanced.CTDBServer}/?tocid={CUE.TOC.TOCID}") { UseShellExecute = true });
         }
 
         /*

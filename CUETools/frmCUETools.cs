@@ -2529,7 +2529,7 @@ namespace JDP
 
         private void toolStripButtonHelp_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("http://www.cuetools.net");
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("http://www.cuetools.net") { UseShellExecute = true });
         }
 
         private void toolStripDropDownButtonProfile_DropDownItemClicked(object sender, ToolStripItemClickedEventArgs e)
@@ -2684,7 +2684,7 @@ namespace JDP
         private void pictureBoxMotd_Click(object sender, EventArgs e)
         {
             if (motdImage != null && pictureBoxMotd.Image == motdImage)
-                System.Diagnostics.Process.Start("http://www.cuetools.net/doku.php/cuetools:download");
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("http://www.cuetools.net/doku.php/cuetools:download") { UseShellExecute = true });
         }
 
         private void checkBoxUseAccurateRip_CheckedChanged(object sender, EventArgs e)

@@ -8,7 +8,7 @@
   #error OutputDir is required
 #endif
 #ifndef AppVersion
-  #define AppVersion "2.2.6"
+  #define AppVersion "2.2.6.1"
 #endif
 #define RedistVersion GetFileVersion(RedistPath)
 
@@ -38,7 +38,7 @@ SolidCompression=yes
 WizardStyle=modern
 CloseApplications=yes
 RestartApplications=no
-VersionInfoVersion={#AppVersion}.0
+VersionInfoVersion={#AppVersion}
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

@@ -14,3 +14,6 @@ Local validation completed:
 The test PC already had a current Visual C++ runtime, so the missing-prerequisite installation path has not been exercised on a clean Windows VM. Wine, ARM64 emulation and upgrades from a different release version have not been tested. The Setup executable is unsigned. The prerequisite and compiler downloads are checked for valid publisher signatures by the build script.
 
 The existing branch's Release regression suite passed before installer work: 64 passed, 6 existing skips. Installer changes do not modify audio-processing code.
+
+## 2.2.6.1 web-link fix
+All five CUETools web-link launch sites explicitly request Windows shell execution, which uses the default browser under modern .NET. The rebuilt website-button handler was invoked in a temporary .NET 10 harness and completed without exception. The self-contained installer was rebuilt with the four-part file version to distinguish this fix from the initial package.

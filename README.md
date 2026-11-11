@@ -44,7 +44,7 @@ Build an offline x64 installer with:
 ./build-installer.ps1 -Configuration Release -NoBuild
 ```
 
-Output: `bin/Release/installer/CUETools-2.2.6-net10-win-x64-Setup.exe`, plus its SHA-256 file. The version is read from the application assembly. The installer bundles a self-contained .NET 10 Windows desktop application and the signed Microsoft Visual C++ x64 redistributable. No .NET installation or network connection is required on the target PC. It supports Start menu shortcuts, an optional desktop shortcut, reinstall/upgrade under a stable application ID, and uninstall. Settings use the existing per-user profile directory and are preserved on uninstall.
+Output: `bin/Release/installer/CUETools-2.2.6.1-net10-win-x64-Setup.exe`, plus its SHA-256 file. The version is read from the application assembly. The installer bundles a self-contained .NET 10 Windows desktop application and the signed Microsoft Visual C++ x64 redistributable. No .NET installation or network connection is required on the target PC. It supports Start menu shortcuts, an optional desktop shortcut, reinstall/upgrade under a stable application ID, and uninstall. Settings use the existing per-user profile directory and are preserved on uninstall.
 
 The default install is for all users and requires administrator rights. Windows 10 build 19045 or later / Windows 11 on x64-compatible systems is required by this package. Wine has not been validated. The Setup executable is unsigned until a code-signing certificate is configured; its bundled Microsoft prerequisite is signature-verified at build time.
 
