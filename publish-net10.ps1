@@ -1,20 +1,22 @@
 [CmdletBinding()]
 param(
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Release',
-    [switch]$NoBuild
+    [switch]$NoBuild,
+    [switch]$SelfContained
 )
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 Push-Location $PSScriptRoot
 try {
     if (-not $NoBuild) { & (Join-Path $PSScriptRoot 'build-net10.ps1') -Configuration $Configuration }
-    $distribution = Join-Path $PSScriptRoot "bin\$Configuration\cuetools-only\win-x64"
+    $distributionName = if ($SelfContained) { 'cuetools-only-self-contained' } else { 'cuetools-only' }
+    $distribution = Join-Path $PSScriptRoot "bin\$Configuration\$distributionName\win-x64"
     $pluginSource = Join-Path $PSScriptRoot "bin\$Configuration\net10.0\plugins"
     $nativeSource = Join-Path $PSScriptRoot $(if ($Configuration -eq 'Debug') { 'ThirdPartyDebug\x64' } else { 'ThirdParty\x64' })
     $apps = [ordered]@{ CUETools = @('CUETools/CUETools.Net10.csproj', 'net10.0-windows') }
     foreach ($appName in $apps.Keys) {
         $appOutput = Join-Path $distribution $appName
-        & dotnet publish $apps[$appName][0] -c $Configuration -f $apps[$appName][1] -r win-x64 --self-contained false -o $appOutput --nologo
+        & dotnet publish $apps[$appName][0] -c $Configuration -f $apps[$appName][1] -r win-x64 --self-contained $SelfContained.IsPresent.ToString().ToLowerInvariant() -p:PublishTrimmed=false -p:PublishSingleFile=false -o $appOutput --nologo
         if ($LASTEXITCODE -ne 0) { throw "Publishing $appName failed with exit code $LASTEXITCODE" }
         $plugins = Join-Path $appOutput 'plugins'
         New-Item -ItemType Directory -Path $plugins -Force | Out-Null
@@ -33,12 +35,9 @@ try {
         # RAR's managed adapter is architecture-neutral, despite its legacy win32 output directory.
         $rarAdapter = Join-Path $pluginSource 'win32\CUETools.Compression.Rar.dll'
         if (Test-Path $rarAdapter) { Copy-Item -LiteralPath $rarAdapter -Destination $nativeDestination -Force }
-        Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'GPL.txt'), (Join-Path $PSScriptRoot 'License.txt') -Destination $appOutput -Force
+        Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'GPL.txt'), (Join-Path $PSScriptRoot 'License.txt'), (Join-Path $PSScriptRoot 'CUETools/user_profiles_enabled') -Destination $appOutput -Force
     }
-    Write-Host "Published framework-dependent x64 CUETools: $distribution"
-    Write-Host 'Install the .NET 10 Desktop Runtime and Visual C++ x64 runtime.'
+    Write-Host "Published x64 CUETools (self-contained: $($SelfContained.IsPresent)): $distribution"
+    if (-not $SelfContained) { Write-Host 'Install the .NET 10 Desktop Runtime and Visual C++ x64 runtime.' }
 }
 finally { Pop-Location }
-
-
-
