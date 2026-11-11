@@ -44,8 +44,14 @@ Build an offline x64 installer with:
 ./build-installer.ps1 -Configuration Release -NoBuild
 ```
 
-Output: `bin/Release/installer/CUETools-2.2.6.1-net10-win-x64-Setup.exe`, plus its SHA-256 file. The version is read from the application assembly. The installer bundles a self-contained .NET 10 Windows desktop application and the signed Microsoft Visual C++ x64 redistributable. No .NET installation or network connection is required on the target PC. It supports Start menu shortcuts, an optional desktop shortcut, reinstall/upgrade under a stable application ID, and uninstall. Settings use the existing per-user profile directory and are preserved on uninstall.
+Output: `bin/Release/installer/CUETools-2.2.6.2-net10-win-x64-Setup.exe`, plus its SHA-256 file. The version is read from the application assembly. The installer bundles a self-contained .NET 10 Windows desktop application and the signed Microsoft Visual C++ x64 redistributable. No .NET installation or network connection is required on the target PC. It supports Start menu shortcuts, an optional desktop shortcut, reinstall/upgrade under a stable application ID, and uninstall. Settings use the existing per-user profile directory and are preserved on uninstall.
 
 The default install is for all users and requires administrator rights. Windows 10 build 19045 or later / Windows 11 on x64-compatible systems is required by this package. Wine has not been validated. The Setup executable is unsigned until a code-signing certificate is configured; its bundled Microsoft prerequisite is signature-verified at build time.
 
 The build script installs the signature-verified Inno Setup 7.1.1 compiler into `bin/tools/InnoSetup` if needed. Supply `-InnoCompiler C:\path\to\ISCC.exe` to use an existing compiler. Build dependencies require network access on their first download; the resulting installer is offline. CI uploads the Setup executable and checksum as the `CUETools-Setup-win-x64` artifact.
+
+
+## Network browser
+In Folder browser or Multiselect Browser mode, expand **Desktop > Network**. Windows-discovered computers appear there; expand a computer to list its shared folders. Click **Add location...** to save a UNC server, share or folder such as `\\NAS`, `\\NAS\Music` or `\\NAS\Music\Albums`. Saved locations are restored on the next launch. **Refresh** reloads the network list.
+
+Network discovery and directory listings load in the background. You can enter a UNC location even when automatic discovery is disabled. Access uses your existing Windows network credentials; if a share requires authentication, connect to it in File Explorer first. Unavailable folders show an error inside the tree and can be retried by collapsing and expanding them. Mapped drives remain under **This PC**. Discovery depends on the Windows network discovery configuration and the remote device.

@@ -11,6 +11,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="4.5.1" />
     <PackageReference Include="MSTest.TestFramework" Version="4.5.1" />
+    <ProjectReference Include="..\CUEControls\CUEControls.Net10.csproj" />
     <ProjectReference Include="..\CUETools.Processor\CUETools.Processor.csproj" />
     <Compile Include="..\CUETools\SingletonController.Net10.cs" Link="SingletonController.cs" />
   </ItemGroup>
@@ -19,4 +20,3 @@
     <None Include="..\bin\$(Configuration)\net10.0\plugins\x64\Ijwhost.dll" Link="plugins\x64\Ijwhost.dll" CopyToOutputDirectory="PreserveNewest" Condition="Exists('..\bin\$(Configuration)\net10.0\plugins\x64\Ijwhost.dll')" />
   </ItemGroup>
 </Project>
-

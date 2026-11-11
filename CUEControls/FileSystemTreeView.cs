@@ -89,7 +89,14 @@ namespace CUEControls
 
 		virtual public void DoExpand()
 		{
-			if (!Directory.Exists(this.Path))
+			#if NET10_0_OR_GREATER
+            if (this.Path != null && this.Path.StartsWith(@"\\"))
+            {
+                NetworkBrowser.ExpandFolder(this);
+                return;
+            }
+#endif
+            if (!Directory.Exists(this.Path))
 				return;
 			var info = new DirectoryInfo(this.Path);
 			FileSystemTreeViewNodeExpandEventArgs e = new FileSystemTreeViewNodeExpandEventArgs();
@@ -145,7 +152,7 @@ namespace CUEControls
 			{
 				case ExtraSpecialFolder.Desktop:
 					foreach (ExtraSpecialFolder fldr in (this.TreeView as FileSystemTreeView).SpecialFolders)
-						try { Nodes.Add(new FileSystemTreeNodeSpecialFolder(icon_mgr, fldr)); }
+						try { Nodes.Add(((FileSystemTreeView)TreeView).NewNode(fldr)); }
 						catch { }
 					break;
 				case ExtraSpecialFolder.MyComputer:
@@ -193,7 +200,7 @@ namespace CUEControls
 		}
 
 		public FileSystemTreeNodeFileSystemInfo(IIconManager icon_mgr, FileSystemInfo file)
-			: base(icon_mgr, (file.Attributes & FileAttributes.Directory) != 0)
+			: base(icon_mgr, file is DirectoryInfo)
 		{
 			this.File = file;
 			this.SelectedImageIndex = this.ImageIndex = this.DisplayIcon;
@@ -220,6 +227,7 @@ namespace CUEControls
 		{
 			m_extra_folders = new ExtraSpecialFolder[] { ExtraSpecialFolder.MyComputer, ExtraSpecialFolder.MyDocuments, ExtraSpecialFolder.CommonDocuments };
 			InitializeComponent();
+            ShowNodeToolTips = true;
 		}
 
 		/// <summary>
@@ -364,12 +372,44 @@ namespace CUEControls
 					}
 				}
 
+#if NET10_0_OR_GREATER
+            if (top == null && path.StartsWith(@"\\"))
+            {
+                foreach (TreeNode child in desktop.Nodes)
+                {
+                    var network = child as FileSystemTreeNodeNetwork;
+                    if (network == null || !network.IsRoot) continue;
+                    if (!network.IsExpanded) network.Expand();
+                    foreach (TreeNode location in network.Nodes)
+                    {
+                        var folder = location as FileSystemTreeNodeNetworkFolder;
+                        if (folder == null) continue;
+                        string prefix = folder.Path.TrimEnd('\\');
+                        if (path.Equals(prefix, StringComparison.OrdinalIgnoreCase)) return folder;
+                        if (path.StartsWith(prefix + @"\", StringComparison.OrdinalIgnoreCase) &&
+                            (top == null || ((FileSystemTreeNode)top).Path.Length < prefix.Length)) top = folder;
+                    }
+                    if (top == null)
+                    {
+                        string[] parts = NetworkLocationsStore.Normalize(path).Substring(2).Split('\\');
+                        if (parts.Length >= 2)
+                        {
+                            top = network.AddLocation(@"\\" + parts[0] + @"\" + parts[1]);
+                            if (path.TrimEnd('\\').Equals(((FileSystemTreeNode)top).Path.TrimEnd('\\'), StringComparison.OrdinalIgnoreCase)) return top;
+                        }
+                    }
+                    break;
+                }
+            }
+#endif
 			if (top == null)
 			{
 				TreeNode computer = LookupNode(desktop.Nodes, ExtraSpecialFolder.MyComputer);
 				if (computer != null)
 					top = computer;
 			}
+
+            if (top == null) return null;
 
 			bool found;
 			do
@@ -398,12 +438,20 @@ namespace CUEControls
 
 		public TreeNode NewNode(ExtraSpecialFolder folder)
 		{
-			return new FileSystemTreeNodeSpecialFolder(m_icon_mgr, folder);
+			#if NET10_0_OR_GREATER
+            if (folder == ExtraSpecialFolder.Network)
+                return new FileSystemTreeNodeNetwork(m_icon_mgr);
+#endif
+            return new FileSystemTreeNodeSpecialFolder(m_icon_mgr, folder);
 		}
 
 		public TreeNode NewNode(FileSystemInfo file)
 		{
-			return new FileSystemTreeNodeFileSystemInfo(m_icon_mgr, file);
+			#if NET10_0_OR_GREATER
+            if (file is DirectoryInfo && file.FullName.StartsWith(@"\\"))
+                return new FileSystemTreeNodeNetworkFolder(m_icon_mgr, file.FullName);
+#endif
+            return new FileSystemTreeNodeFileSystemInfo(m_icon_mgr, file);
 		}
 
 		public TreeNode NewNode(string file)
@@ -472,6 +520,25 @@ namespace CUEControls
 			}
 		}
 
+#if NET10_0_OR_GREATER
+        protected override void OnNodeMouseClick(TreeNodeMouseClickEventArgs e)
+        {
+            base.OnNodeMouseClick(e);
+            if (e.Button == MouseButtons.Left && e.Node is NetworkActionNode action && e.Clicks == 1)
+                BeginInvoke((Action)(() => action.Action()));
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            if ((e.KeyCode == Keys.Enter || e.KeyCode == Keys.Space) && SelectedNode is NetworkActionNode action)
+            {
+                e.Handled = e.SuppressKeyPress = true;
+                action.Action();
+                return;
+            }
+            base.OnKeyDown(e);
+        }
+#endif
 		protected override void WndProc(ref Message m)
 		{
 			// Filter double-click messages

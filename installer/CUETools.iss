@@ -8,7 +8,7 @@
   #error OutputDir is required
 #endif
 #ifndef AppVersion
-  #define AppVersion "2.2.6.1"
+  #define AppVersion "2.2.6.2"
 #endif
 #define RedistVersion GetFileVersion(RedistPath)
 

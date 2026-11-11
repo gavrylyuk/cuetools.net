@@ -17,3 +17,8 @@ The existing branch's Release regression suite passed before installer work: 64 
 
 ## 2.2.6.1 web-link fix
 All five CUETools web-link launch sites explicitly request Windows shell execution, which uses the default browser under modern .NET. The rebuilt website-button handler was invoked in a temporary .NET 10 harness and completed without exception. The self-contained installer was rebuilt with the four-part file version to distinguish this fix from the initial package.
+
+## 2.2.6.2 Network browser
+Added Desktop > Network with Windows Shell computer/share discovery, saved UNC server/share/folder locations, refresh and asynchronous directory loading. Existing Windows credentials are used; no credentials are stored by this feature. Network requests that finish after a node is refreshed or collapsed are ignored. Newly loaded children inherit checkbox selections without changing existing selections.
+
+Validation: Release application and self-contained installer builds passed. All 24 migration/native tests passed, including 16 new network tests for UNC validation, persistence, background completion, checkbox inheritance, stale results and offline errors. Computer-use verification in an isolated test copy confirmed discovery of a network computer, adding and browsing a local UNC folder, restoring that saved location after restart, and retaining the selected location when the Add dialog closes. The user's installed application was left running. Remote NAS authentication and Wine were not separately tested.

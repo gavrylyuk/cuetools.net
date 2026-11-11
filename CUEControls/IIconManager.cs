@@ -94,6 +94,7 @@ namespace CUEControls
 		// Summary:
 		//     The "My Computer" folder.
 		MyComputer = 17,
+        Network = 18,
 		//
 		// Summary:
 		//     The directory that serves as a common repository for document templates.

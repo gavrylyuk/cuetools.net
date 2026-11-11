@@ -281,6 +281,7 @@ namespace JDP {
             this.fileSystemTreeView1.ShowRootLines = false;
             this.fileSystemTreeView1.SpecialFolders = new CUEControls.ExtraSpecialFolder[] {
         CUEControls.ExtraSpecialFolder.MyComputer,
+        CUEControls.ExtraSpecialFolder.Network,
         CUEControls.ExtraSpecialFolder.Profile,
         CUEControls.ExtraSpecialFolder.MyMusic,
         CUEControls.ExtraSpecialFolder.CommonMusic};
@@ -1219,4 +1220,3 @@ namespace JDP {
         private System.Windows.Forms.TextBox textBoxOffset;
 	}
 }
-
