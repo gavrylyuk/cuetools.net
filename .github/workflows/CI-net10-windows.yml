@@ -1,4 +1,4 @@
-name: CI-net10-windows
+name: CUETools-only-net10
 on:
   push:
   pull_request:
@@ -40,10 +40,12 @@ jobs:
         run: ./publish-net10.ps1 -Configuration Release -NoBuild
       - uses: actions/upload-artifact@v4
         with:
-          name: CUETools-net10-win-x64
-          path: bin/Release/net10-dist/win-x64/
+          name: CUETools-only-net10-win-x64
+          path: bin/Release/cuetools-only/win-x64/CUETools/
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: net10-test-results
           path: bin/TestResults/net10-Release/*.trx
+
+

@@ -64,3 +64,8 @@ The checkout already contains local framework upgrades and third-party changes. 
 - The hidden startup-diagnostic process was closed so it does not keep the CD drive open. User-controlled windows were left alone.
 
 Final Release verification: 67 tests passed, 6 pre-existing skips, zero failures. The final managed build/test script completed successfully after all code fixes. Native TTA cases cover 16-bit and 24-bit short, exact-frame and multi-frame inputs. The original solution's Release / Any CPU build also passed. No remote CI execution or legacy-target retirement is claimed.
+
+## CUETools-only branch
+The `cuetools-only` branch is based on `net10-migration` and keeps CUETools as the only application. The modern solution, build, publisher and CI now target CUETools and its libraries/plugins/tests. Player-only playlist tests were removed; CUE encoding, single-instance IPC and native TTA regression cases remain. `CUETools.Ripper` remains as a Processor interface dependency, without the hardware backend or ripping applications. Earlier records above describe the full migration branch.
+
+CUETools-only validation: `./build-net10.ps1 -Configuration Release` succeeded, including native x64 builds. Regression results: 64 passed, 6 existing skips, zero failures (parity 18, codecs 34, processor 4, migration/native 8). `./publish-net10.ps1 -Configuration Release -NoBuild` succeeded; the separate CUETools-only package contains no removed application or hardware-ripper DLLs. Existing compiler/analyzer warnings remain. GUI and hardware checks were not repeated for this separation.

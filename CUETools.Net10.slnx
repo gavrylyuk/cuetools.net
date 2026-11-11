@@ -1,19 +1,10 @@
 <Solution>
-  <Project Path="ProgressODoom/ProgressODoom.Net10.csproj" />
-  <Project Path="CUETools.ChaptersToCue/CUETools.ChaptersToCue.Net10.csproj" />
   <Project Path="CUETools.Codecs.FLACCL/CUETools.Codecs.FLACCL.Net10.csproj" />
-  <Project Path="CUETools.FLACCL.cmd/CUETools.FLACCL.cmd.Net10.csproj" />
-  <Project Path="CUETools.eac3ui/BLUTools.Net10.csproj" />
   <Project Path="CUETools.CLParity/CUETools.CLParity.Net10.csproj" />
   <Project Path="CUEControls/CUEControls.Net10.csproj" />
-  <Project Path="CUEPlayer/CUEPlayer.Net10.csproj" />
   <Project Path="CUETools/CUETools.Net10.csproj" />
-  <Project Path="CUERipper/CUERipper.Net10.csproj" />
-  <Project Path="CUERipper.WPF/CUERipper.WPF.Net10.csproj" />
   <Project Path="CUETools/CUETools.TestCodecs/CUETools.TestCodecs.Net10.csproj" />
-  <Project Path="CUETools/TestRipper/TestRipper.Net10.csproj" />
   <Project Path="CUETools/CUETools.TestProcessor/CUETools.TestProcessor.Net10.csproj" />
   <Project Path="CUETools.Net10.Tests/CUETools.Net10.Tests.csproj" />
-  <Project Path="CUETools.Codecs.DirectSound/CUETools.Codecs.DirectSound.Net10.csproj" />
-  <Project Path="CUETools.CTDB.EACPlugin/CUETools.CTDB.EACPlugin.Net10.csproj" />
 </Solution>
+
