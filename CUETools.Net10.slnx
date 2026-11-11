@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="CUETools/CUETools.TestParity/CUETools.TestParity.csproj" />
   <Project Path="CUETools.Codecs.FLACCL/CUETools.Codecs.FLACCL.Net10.csproj" />
   <Project Path="CUETools.CLParity/CUETools.CLParity.Net10.csproj" />
   <Project Path="CUEControls/CUEControls.Net10.csproj" />
@@ -7,4 +8,5 @@
   <Project Path="CUETools/CUETools.TestProcessor/CUETools.TestProcessor.Net10.csproj" />
   <Project Path="CUETools.Net10.Tests/CUETools.Net10.Tests.csproj" />
 </Solution>
+
 
