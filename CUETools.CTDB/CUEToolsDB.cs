@@ -24,6 +24,26 @@ namespace CUETools.CTDB
 	public class CUEToolsDB
 	{
 		const string defaultServer = "db.cuetools.net";
+        /// <summary>Builds a browser link; the public web UI uses a different host from the lookup API.</summary>
+        public static string GetBrowserUrl(string server, string tocId)
+        {
+            if (string.IsNullOrEmpty(tocId)) throw new ArgumentException("A CTDB TOCID is required.", "tocId");
+            string address = server == null || server.Trim().Length == 0 ? defaultServer : server.Trim();
+            if (!address.Contains("://")) address = "http://" + address;
+            Uri endpoint;
+            if (!Uri.TryCreate(address, UriKind.Absolute, out endpoint) ||
+                (endpoint.Scheme != Uri.UriSchemeHttp && endpoint.Scheme != Uri.UriSchemeHttps))
+                throw new ArgumentException("The CTDB server must be an HTTP or HTTPS address.", "server");
+
+            bool publicServer = endpoint.IsDefaultPort && endpoint.AbsolutePath == "/" &&
+                (endpoint.Host.Equals("db.cuetools.net", StringComparison.OrdinalIgnoreCase) ||
+                 endpoint.Host.Equals("db.cue.tools", StringComparison.OrdinalIgnoreCase));
+            var browser = publicServer ? new UriBuilder("https://db.cue.tools/ui/") : new UriBuilder(endpoint);
+            browser.Path = browser.Path.TrimEnd('/') + "/";
+            browser.Query = "tocid=" + Uri.EscapeDataString(tocId);
+            browser.Fragment = "";
+            return browser.Uri.AbsoluteUri;
+        }
 		string urlbase;
 		string userAgent;
 		string driveName;

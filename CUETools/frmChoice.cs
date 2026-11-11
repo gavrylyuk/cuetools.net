@@ -532,7 +532,7 @@ namespace JDP
         private void buttonNavigateCTDB_Click(object sender, EventArgs e)
         {
             if (CUE == null) return;
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo($"http://{config.advanced.CTDBServer}/?tocid={CUE.TOC.TOCID}") { UseShellExecute = true });
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(CUETools.CTDB.CUEToolsDB.GetBrowserUrl(config.advanced.CTDBServer, CUE.TOC.TOCID)) { UseShellExecute = true });
         }
 
         /*
