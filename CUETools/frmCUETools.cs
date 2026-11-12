@@ -820,9 +820,10 @@ namespace JDP
                             toolStripStatusLabelAR.Visible = useAR;
                             toolStripStatusLabelCTDB.Visible = useCUEToolsDB;
 
-                            if (_batchPaths.Count <= 1 && _batchProcessed == 0 && action == CUEAction.Encode && checkBoxEditTags.Checked)
+                            if (_profile._config.ShouldChooseAlbumMetadata(action == CUEAction.Encode, checkBoxEditTags.Checked, _batchPaths.Count, _batchProcessed))
                             {
                                 frmChoice dlg = new frmChoice();
+                                if (_profile._config.chooseMetadataForEachAlbum) dlg.Text = "Select metadata — " + pathIn;
                                 dlg.config = _profile._config;
                                 if (_choiceWidth != 0 && _choiceHeight != 0)
                                     dlg.Size = new Size(_choiceWidth, _choiceHeight);
@@ -844,7 +845,7 @@ namespace JDP
                                 {
                                     cueSheet.Close();
                                     SetupControls(false);
-                                    if (_batchPaths.Count == 1)
+                                    if (_batchPaths.Count == 1 || _profile._config.chooseMetadataForEachAlbum)
                                     {
                                         _batchPaths.Clear();
                                     }

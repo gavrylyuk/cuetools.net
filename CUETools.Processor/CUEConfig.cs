@@ -38,6 +38,8 @@ namespace CUETools.Processor
         public string specialExceptions;
         public bool replaceSpaces;
         public string invalidFilenameReplacement;
+        public bool replaceInvalidWithSpace;
+        public bool chooseMetadataForEachAlbum;
         public bool embedLog;
         public bool extractLog;
         public bool alwaysWriteUTF8CUEFile;
@@ -110,6 +112,8 @@ namespace CUETools.Processor
             specialExceptions = "-()";
             replaceSpaces = false;
             invalidFilenameReplacement = "_";
+            replaceInvalidWithSpace = false;
+            chooseMetadataForEachAlbum = false;
             embedLog = true;
             extractLog = true;
             alwaysWriteUTF8CUEFile = false;
@@ -199,6 +203,8 @@ namespace CUETools.Processor
             specialExceptions = src.specialExceptions;
             replaceSpaces = src.replaceSpaces;
             invalidFilenameReplacement = src.invalidFilenameReplacement;
+            replaceInvalidWithSpace = src.replaceInvalidWithSpace;
+            chooseMetadataForEachAlbum = src.chooseMetadataForEachAlbum;
             embedLog = src.embedLog;
             extractLog = src.extractLog;
             alwaysWriteUTF8CUEFile = src.alwaysWriteUTF8CUEFile;
@@ -289,6 +295,8 @@ namespace CUETools.Processor
             sw.Save("SpecialCharactersExceptions", specialExceptions);
             sw.Save("ReplaceSpaces", replaceSpaces);
             sw.Save("InvalidFilenameReplacement", invalidFilenameReplacement);
+            sw.Save("ReplaceInvalidWithSpace", replaceInvalidWithSpace);
+            sw.Save("ChooseMetadataForEachAlbum", chooseMetadataForEachAlbum);
             sw.Save("EmbedLog", embedLog);
             sw.Save("ExtractLog", extractLog);
             sw.Save("AlwaysWriteUTF8CUEFile", alwaysWriteUTF8CUEFile);
@@ -406,6 +414,8 @@ namespace CUETools.Processor
             replaceSpaces = sr.LoadBoolean("ReplaceSpaces") ?? false;
             string replacement = sr.Load("InvalidFilenameReplacement");
             invalidFilenameReplacement = IsValidFilenameReplacement(replacement) ? replacement : "_";
+            replaceInvalidWithSpace = sr.LoadBoolean("ReplaceInvalidWithSpace") ?? false;
+            chooseMetadataForEachAlbum = sr.LoadBoolean("ChooseMetadataForEachAlbum") ?? false;
             embedLog = sr.LoadBoolean("EmbedLog") ?? true;
             extractLog = sr.LoadBoolean("ExtractLog") ?? true;
             alwaysWriteUTF8CUEFile = sr.LoadBoolean("AlwaysWriteUTF8CUEFile") ?? false;
@@ -622,6 +632,11 @@ namespace CUETools.Processor
             return value != null && value.Length == 1 && value[0] >= '!' && value[0] <= '~'
                 && value[0] != '.' && "<>:\"/\\|?*".IndexOf(value[0]) < 0;
         }
+        public bool ShouldChooseAlbumMetadata(bool isEncoding, bool editTags, int remainingAlbums, int processedAlbums)
+        {
+            return isEncoding && (chooseMetadataForEachAlbum || (editTags && remainingAlbums <= 1 && processedAlbums == 0));
+        }
+
         public string CleanseString(string s)
         {
             StringBuilder sb = new StringBuilder();
@@ -634,7 +649,7 @@ namespace CUETools.Processor
             {
                 char ch = s[i];
                 if (Array.IndexOf(invalid, ch) >= 0)
-                    sb.Append(IsValidFilenameReplacement(invalidFilenameReplacement) ? invalidFilenameReplacement : "_");
+                    sb.Append(replaceInvalidWithSpace ? " " : (IsValidFilenameReplacement(invalidFilenameReplacement) ? invalidFilenameReplacement : "_"));
                 else if ((replaceSpaces && ch == ' ') || (filenamesANSISafe && removeSpecial && specialExceptions.IndexOf(ch) < 0 && !(
                     ((ch >= 'a') && (ch <= 'z')) ||
                     ((ch >= 'A') && (ch <= 'Z')) ||
