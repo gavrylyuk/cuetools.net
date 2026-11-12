@@ -206,6 +206,23 @@ public class ParallelFlacTests
         }
     }
     [TestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
+    public void UnicodeTrackTitlesSurviveFlacConversionAndCue(bool parallel)
+    {
+        var config = Config();
+        const string title = "無何有の郷 - Привет - Łódź - café";
+        string input = Cue(config, "wav", false);
+        File.WriteAllText(input, File.ReadAllText(input).Replace("Song 1", title), new System.Text.UTF8Encoding(true));
+        string destination = Path.Combine(root, "unicode-output");
+        string[] files = Convert(config, input, destination, parallel, CUEStyle.GapsAppended, 0);
+        Assert.AreEqual("01. " + title + ".flac", Path.GetFileName(files[0]));
+        Assert.IsTrue(File.Exists(files[0]));
+        StringAssert.Contains(File.ReadAllText(Path.Combine(destination, "album.cue")), "\"01. " + title + ".flac\"");
+        using var tagged = TagLib.File.Create(files[0]);
+        Assert.AreEqual(title, tagged.Tag.Title);
+    }
+    [TestMethod]
     public void EncoderFailurePublishesNothingAndReleasesTemporaryFiles()
     {
         var config=Config();string input=Cue(config,"wav",false);((CUETools.Codecs.CommandLine.EncoderSettings)config.formats["flac"].encoderLossless.Settings).Parameters="--cuetools-invalid-test-option %I -o %O";

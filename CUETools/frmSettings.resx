@@ -845,7 +845,7 @@ You can set up foobar2000 to show those values, and see if your music was ripped
     <value>Force ANSI filenames</value>
   </data>
   <data name="chkFilenamesANSISafe.ToolTip" xml:space="preserve">
-    <value>Only allow characters, which are present in ANSI codepage, for compatibility with non-unicode applications</value>
+    <value>Legacy compatibility: convert filenames to the Windows ANSI code page. This can replace Japanese, Cyrillic, and other characters; leave unchecked to preserve Unicode.</value>
   </data>
   <data name="&gt;&gt;chkFilenamesANSISafe.Name" xml:space="preserve">
     <value>chkFilenamesANSISafe</value>

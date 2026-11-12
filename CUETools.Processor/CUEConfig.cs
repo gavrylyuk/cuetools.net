@@ -121,7 +121,7 @@ namespace CUETools.Processor
             writeDummyCUESheetComment = true;
             fillUpCUE = true;
             overwriteCUEData = false;
-            filenamesANSISafe = true;
+            filenamesANSISafe = false;
             bruteForceDTL = false;
             createEACLOG = true;
             detectHDCD = true;
@@ -415,7 +415,7 @@ namespace CUETools.Processor
             writeDummyCUESheetComment = sr.LoadBoolean("WriteDummyCUESheetComment") ?? true;
             fillUpCUE = sr.LoadBoolean("FillUpCUE") ?? true;
             overwriteCUEData = sr.LoadBoolean("OverwriteCUEData") ?? false;
-            filenamesANSISafe = sr.LoadBoolean("FilenamesANSISafe") ?? true;
+            filenamesANSISafe = sr.LoadBoolean("FilenamesANSISafe") ?? false;
             bruteForceDTL = sr.LoadBoolean("BruteForceDTL") ?? false;
             createEACLOG = sr.LoadBoolean("CreateEACLOG") ?? createEACLOG;
             detectHDCD = sr.LoadBoolean("DetectHDCD") ?? true;
