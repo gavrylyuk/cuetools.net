@@ -543,15 +543,17 @@ namespace JDP
 
         private void MakeSelection(object sender, CUEToolsSelectionEventArgs e)
         {
-            if (_batchPaths.Count > 1 || _batchProcessed > 0)
+            bool artworkChoice = _profile._config.ShouldChooseBatchArtwork(e.choices);
+            if ((_batchPaths.Count > 1 || _batchProcessed > 0) && !artworkChoice)
             {
-                // Select the first album art (or log file) in case of batch mode.
+                // Keep automatic selection for logs and batches without per-album artwork choice.
                 e.selection = 0;
                 return;
             }
             this.Invoke((MethodInvoker)delegate()
             {
                 frmChoice dlg = new frmChoice();
+                if (artworkChoice && sender is CUESheet sheet) dlg.Text = "Select album cover — " + sheet.InputPath;
                 dlg.config = _profile._config;
                 if (_choiceWidth != 0 && _choiceHeight != 0)
                     dlg.Size = new Size(_choiceWidth, _choiceHeight);
