@@ -63,7 +63,7 @@ namespace JDP
             InitializeComponent();
 #if NET10_0_OR_GREATER
             Text = "CUETools";
-            if (File.Exists(Path.Combine(AppContext.BaseDirectory, "parallel_experiment"))) Text += " · Parallel Experimental";
+            if (File.Exists(Path.Combine(AppContext.BaseDirectory, "parallel_experiment"))) Text += " · Parallel";
             fileSystemTreeView1.ShowNodeToolTips = false;
             UiHelp.Attach(this, toolTip1); UiHelp.AddMenu(toolStripMenu, this);
 #endif

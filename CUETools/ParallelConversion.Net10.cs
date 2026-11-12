@@ -36,11 +36,11 @@ namespace JDP
                 SelectedCUEStyle == CUEStyle.SingleFile || SelectedCUEStyle == CUEStyle.SingleFileWithCUE ||
                 !(encoder?.Settings is CUETools.Codecs.CommandLine.EncoderSettings) ||
                 (comboBoxScript.SelectedItem is CUEToolsScript script && script.name != "default")) return true;
-            using var setup = new Form { Text = "Experimental parallel FLAC conversion", ClientSize = new Size(570, 245), FormBorderStyle = FormBorderStyle.FixedDialog, StartPosition = FormStartPosition.CenterParent, MinimizeBox = false, MaximizeBox = false };
+            using var setup = new Form { Text = "Parallel FLAC conversion", ClientSize = new Size(570, 245), FormBorderStyle = FormBorderStyle.FixedDialog, StartPosition = FormStartPosition.CenterParent, MinimizeBox = false, MaximizeBox = false };
             var label = new Label { Text = "One album at a time; several external FLAC encoders.\r\nDecoding, gaps, HDCD and disc verification retain their existing order.\r\nTemporary WAV tracks use local disk space, with at most workers + 1 tracks staged.\r\nOutputs are published only after encoding, PCM checking and tagging succeed.", AutoSize = false };
             label.SetBounds(14, 12, 540, 83); setup.Controls.Add(label);
             var countLabel = new Label { Text = "Concurrent encoders", AutoSize = true }; countLabel.SetBounds(14, 105, 160, 23); setup.Controls.Add(countLabel);
-            var count = new NumericUpDown { Minimum = 1, Maximum = 16, Value = Math.Min(2, Environment.ProcessorCount) }; count.SetBounds(184, 101, 70, 25); setup.Controls.Add(count);
+            var count = new NumericUpDown { Minimum = 1, Maximum = 16, Value = 4 }; count.SetBounds(184, 101, 70, 25); setup.Controls.Add(count);
             var tempLabel = new Label { Text = "Local temporary folder", AutoSize = true }; tempLabel.SetBounds(14, 140, 160, 23); setup.Controls.Add(tempLabel);
             var temp = new TextBox { Text = Path.Combine(Path.GetTempPath(), "CUETools-parallel") }; temp.SetBounds(184, 137, 370, 25); setup.Controls.Add(temp);
             var start = new Button { Text = "Start parallel", DialogResult = DialogResult.Yes }; start.SetBounds(184, 191, 115, 32);
@@ -133,7 +133,7 @@ namespace JDP
         internal ParallelQueueForm(ParallelConversionBatch batch, Action refreshOwner, Action<bool> stop)
         {
             this.batch = batch; this.refreshOwner = refreshOwner; this.stop = stop;
-            Text = "CUETools · Experimental parallel conversion"; Size = new Size(950, 560); MinimumSize = new Size(700, 400); StartPosition = FormStartPosition.CenterParent;
+            Text = "CUETools · Parallel conversion"; Size = new Size(950, 560); MinimumSize = new Size(700, 400); StartPosition = FormStartPosition.CenterParent;
             var layout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 5, Padding = new Padding(12) };
             layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 40)); layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 42)); layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 38)); layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 45));
             summary.Dock = source.Dock = DockStyle.Fill; summary.AutoEllipsis = source.AutoEllipsis = true;

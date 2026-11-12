@@ -50,6 +50,8 @@ namespace CUETools.Codecs
             src_encoders.ForEach(item => encoders.Add(item.Clone()));
             src_decoders.ForEach(item => decoders.Add(item.Clone()));
 
+            int pluginEncoderCount = encoders.Count;
+            int pluginDecoderCount = decoders.Count;
             if (Type.GetType("Mono.Runtime", false) == null)
             {
                 encoders.Add(new CommandLine.EncoderSettings("flac.exe", "flac", true, "0 1 2 3 4 5 6 7 8", "5", "flac.exe", "-%M -P %P - -o %O"));
@@ -71,6 +73,16 @@ namespace CUETools.Codecs
                 // !!!
             }
 
+            for (int i = pluginEncoderCount; i < encoders.Count; i++)
+            {
+                var item = (CommandLine.EncoderSettings)encoders[i];
+                item.PresetId = JsonConvert.SerializeObject(new[] { item.Name, item.Extension, item.Lossless ? "1" : "0" });
+            }
+            for (int i = pluginDecoderCount; i < decoders.Count; i++)
+            {
+                var item = (CommandLine.DecoderSettings)decoders[i];
+                item.PresetId = JsonConvert.SerializeObject(new[] { item.Name, item.Extension });
+            }
             encodersViewModel = new EncoderListViewModel(encoders);
             decodersViewModel = new DecoderListViewModel(decoders);
 
