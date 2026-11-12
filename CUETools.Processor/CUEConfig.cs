@@ -328,6 +328,14 @@ namespace CUETools.Processor
             sw.Save("ArLogFilenameFormat", ArLogFilenameFormat);
             sw.Save("AlArtFilenameFormat", AlArtFilenameFormat);
 
+            // Record only intentionally absent built-in command-line entries. New defaults
+            // can still be introduced by future versions without restoring deleted ones.
+            var defaults = CreateDefaultExternalCodecs();
+            var removedEncoders = defaults.encoders.Where(x => !advanced.encoders.Any(y => EncoderKey(x) == EncoderKey(y))).Select(EncoderKey).ToArray();
+            var removedDecoders = defaults.decoders.Where(x => !advanced.decoders.Any(y => DecoderKey(x) == DecoderKey(y))).Select(DecoderKey).ToArray();
+            sw.Save("RemovedDefaultExternalEncoders", JsonConvert.SerializeObject(removedEncoders));
+            sw.Save("RemovedDefaultExternalDecoders", JsonConvert.SerializeObject(removedDecoders));
+
             sw.SaveText("Advanced", JsonConvert.SerializeObject(advanced,
                 Newtonsoft.Json.Formatting.Indented,
                 new JsonSerializerSettings
@@ -461,12 +469,15 @@ namespace CUETools.Processor
                     // Preserve partial definitions; they may be user work in progress.
                     advanced.encoders.RemoveAll(IsEmptyExternalEncoder);
                     advanced.decoders.RemoveAll(IsEmptyExternalDecoder);
-                    // Add missing codecs
-                    backup.encoders.Where(x => advanced.encoders
-                        .FindAll(y => y.Extension == x.Extension && y.Lossless == x.Lossless && y.Name == x.Name).Count == 0)
+                    // Preserve explicitly removed command-line defaults while still discovering
+                    // built-in plugins and defaults added after the settings were saved.
+                    var removedEncoders = LoadRemovedCodecKeys(sr.Load("RemovedDefaultExternalEncoders"));
+                    var removedDecoders = LoadRemovedCodecKeys(sr.Load("RemovedDefaultExternalDecoders"));
+                    backup.encoders.Where(x => !(x is CUETools.Codecs.CommandLine.EncoderSettings && removedEncoders.Contains(EncoderKey(x))) &&
+                        !advanced.encoders.Any(y => EncoderKey(y) == EncoderKey(x)))
                         .ToList().ForEach(x => advanced.encoders.Add(x));
-                    backup.decoders.Where(x => advanced.decoders
-                        .FindAll(y => y.Extension == x.Extension && y.Name == x.Name).Count == 0)
+                    backup.decoders.Where(x => !(x is CUETools.Codecs.CommandLine.DecoderSettings && removedDecoders.Contains(DecoderKey(x))) &&
+                        !advanced.decoders.Any(y => DecoderKey(y) == DecoderKey(x)))
                         .ToList().ForEach(x => advanced.decoders.Add(x));
 
                     // Reset the ViewModel
@@ -565,6 +576,29 @@ namespace CUETools.Processor
                     break;
             }
             return proxy;
+        }
+
+        private static CUEToolsCodecsConfig CreateDefaultExternalCodecs()
+        {
+            var defaults = new CUEToolsCodecsConfig();
+            defaults.Init(new List<IAudioEncoderSettings>(), new List<IAudioDecoderSettings>());
+            return defaults;
+        }
+
+        private static string EncoderKey(IAudioEncoderSettings value)
+        {
+            return JsonConvert.SerializeObject(new[] { value.Name, value.Extension, value.Lossless ? "1" : "0" });
+        }
+
+        private static string DecoderKey(IAudioDecoderSettings value)
+        {
+            return JsonConvert.SerializeObject(new[] { value.Name, value.Extension });
+        }
+
+        private static HashSet<string> LoadRemovedCodecKeys(string json)
+        {
+            try { return new HashSet<string>(JsonConvert.DeserializeObject<string[]>(json ?? "[]") ?? new string[0]); }
+            catch (JsonException) { return new HashSet<string>(); }
         }
 
         private static bool IsEmptyExternalEncoder(IAudioEncoderSettings value)

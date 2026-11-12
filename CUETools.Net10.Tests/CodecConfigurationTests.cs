@@ -52,4 +52,53 @@ namespace CUETools.Net10.Tests;
             Assert.IsTrue(again.advanced.encoders.Any(e=>e.Name=="Draft encoder"));Assert.IsTrue(again.advanced.decoders.Any(d=>d.Name=="Custom decoder"));
         } finally { Directory.Delete(dir,true); }
     }
+    [TestMethod] public void DeletedDefaultExternalCodecsStayDeletedAndCanBeRestored()
+    {
+        string dir = Path.Combine(Path.GetTempPath(), "cuetools-deleted-codecs-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        try
+        {
+            var config = new CUEConfig();
+            var removedEncoder = config.Encoders.Single(e => e.Name == "flake.exe" && e.Extension == "flac");
+            var removedDecoder = config.Decoders.Single(d => d.Name == "takc.exe" && d.Extension == "tak");
+            config.Encoders.Remove(removedEncoder);
+            config.Decoders.Remove(removedDecoder);
+            config.advanced.encoders.Add(new CUETools.Codecs.CommandLine.EncoderSettings("My encoder", "flac", true, "8", "8", "my.exe", "-%M %O"));
+            string app = Path.Combine(dir, "app.exe");
+            var writer = new SettingsWriter("Test", "settings.txt", app); config.Save(writer); writer.Close();
+            var restored = new CUEConfig(); restored.Load(new SettingsReader("Test", "settings.txt", app));
+            Assert.IsFalse(restored.Encoders.Any(e => e.Name == "flake.exe" && e.Extension == "flac"));
+            Assert.IsFalse(restored.Decoders.Any(d => d.Name == "takc.exe" && d.Extension == "tak"));
+            Assert.IsTrue(restored.Encoders.Any(e => e.Name == "flac.exe"));
+            Assert.IsTrue(restored.Encoders.Any(e => e.Name == "My encoder"));
+            restored.advanced.encoders.Add(removedEncoder.Settings);
+            restored.advanced.decoders.Add(removedDecoder.Settings);
+            writer = new SettingsWriter("Test", "settings.txt", app); restored.Save(writer); writer.Close();
+            var readded = new CUEConfig(); readded.Load(new SettingsReader("Test", "settings.txt", app));
+            Assert.IsTrue(readded.Encoders.Any(e => e.Name == "flake.exe" && e.Extension == "flac"));
+            Assert.IsTrue(readded.Decoders.Any(d => d.Name == "takc.exe" && d.Extension == "tak"));
+        }
+        finally { Directory.Delete(dir, true); }
+    }
+    [TestMethod] public void MissingNewDefaultsAreAddedButExplicitlyDeletedOnesAreNot()
+    {
+        string dir = Path.Combine(Path.GetTempPath(), "cuetools-new-default-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        try
+        {
+            var config = new CUEConfig();
+            config.Encoders.Remove(config.Encoders.Single(e => e.Name == "flake.exe" && e.Extension == "flac"));
+            config.Encoders.Remove(config.Encoders.Single(e => e.Name == "flac.exe" && e.Extension == "flac"));
+            string app = Path.Combine(dir, "app.exe");
+            var writer = new SettingsWriter("Test", "settings.txt", app);
+            writer.SaveText("Advanced", Newtonsoft.Json.JsonConvert.SerializeObject(config.advanced, Newtonsoft.Json.Formatting.Indented, new Newtonsoft.Json.JsonSerializerSettings { DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.IgnoreAndPopulate, TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Auto }));
+            var key = Newtonsoft.Json.JsonConvert.SerializeObject(new[] { "flake.exe", "flac", "1" });
+            writer.Save("RemovedDefaultExternalEncoders", Newtonsoft.Json.JsonConvert.SerializeObject(new[] { key }));
+            writer.Close();
+            var loaded = new CUEConfig(); loaded.Load(new SettingsReader("Test", "settings.txt", app));
+            Assert.IsFalse(loaded.Encoders.Any(e => e.Name == "flake.exe" && e.Extension == "flac"));
+            Assert.IsTrue(loaded.Encoders.Any(e => e.Name == "flac.exe" && e.Extension == "flac"), "A default introduced after the saved profile must be added.");
+        }
+        finally { Directory.Delete(dir, true); }
+    }
 }
