@@ -7,6 +7,18 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace CUETools.Net10.Tests;
 [TestClass] public class CodecConfigurationTests
 {
+    [TestMethod] public void CoreAssemblyIsNotDiscoveredAsAPlugin()
+    {
+        var encoders = CUEProcessorPlugins.encs.ToArray();
+        var decoders = CUEProcessorPlugins.decs.ToArray();
+        var scan = typeof(CUEProcessorPlugins).GetMethod("AddPlugin", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+        Assert.IsNotNull(scan);
+        scan.Invoke(null, new object[] { typeof(CUETools.Codecs.IAudioEncoderSettings).Assembly.Location });
+        CollectionAssert.AreEqual(encoders, CUEProcessorPlugins.encs.ToArray());
+        CollectionAssert.AreEqual(decoders, CUEProcessorPlugins.decs.ToArray());
+        Assert.IsFalse(CUEProcessorPlugins.encs.OfType<CUETools.Codecs.CommandLine.EncoderSettings>().Any(e => string.IsNullOrWhiteSpace(e.Name) && string.IsNullOrWhiteSpace(e.Extension)));
+        Assert.IsFalse(CUEProcessorPlugins.decs.OfType<CUETools.Codecs.CommandLine.DecoderSettings>().Any(e => string.IsNullOrWhiteSpace(e.Name) && string.IsNullOrWhiteSpace(e.Extension)));
+    }
     [TestMethod] public void LoadingRemovesOnlyCompletelyEmptyExternalCodecs()
     {
         string dir=Path.Combine(Path.GetTempPath(),"cuetools-codec-settings-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(dir);

@@ -61,6 +61,10 @@ namespace CUETools.Processor
         private static void AddPlugin(string plugin_path)
         {
             AssemblyName name = AssemblyName.GetAssemblyName(plugin_path);
+            // The core codec assembly contains command-line templates and the built-in WAV codec,
+            // not plugin registrations. Scanning copies creates blank and duplicate entries.
+            if (name.Name == typeof(IAudioEncoderSettings).Assembly.GetName().Name)
+                return;
 #if NET10_0_OR_GREATER
             Assembly assembly = Assembly.LoadFrom(Path.GetFullPath(plugin_path));
 #else

@@ -78,7 +78,7 @@ namespace JDP
                 case "textBoxOffset": return "Set the write offset in samples.";
                 case "chkWriteArLogOnConvert": return "Write an AccurateRip report while converting.";
                 case "chkWriteARLogOnVerify": return "Write an AccurateRip report when verifying.";
-                case "chkEncodeWhenZeroOffset": return "Apply the zero-offset condition when deciding whether to encode.";
+                case "chkEncodeWhenZeroOffset": return "Require the AccurateRip match to have zero offset before encoding.";
                 case "numEncodeWhenPercent": return "Minimum percentage of matching tracks required by the encode condition.";
                 case "numEncodeWhenConfidence": return "Minimum AccurateRip confidence required by the encode condition.";
                 case "numFixWhenPercent": return "Minimum percentage of matching tracks required for offset correction.";
