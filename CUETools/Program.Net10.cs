@@ -16,6 +16,7 @@ namespace JDP
 		[STAThread]
 		static void Main(string[] args)
 		{
+			Application.SetColorMode(UiHelp.LoadTheme());
 			if (args.Length > 1 && args[0].Length > 1 && args[0][0] == '/')
 			{
 				Application.SetDefaultFont(new System.Drawing.Font("Microsoft Sans Serif", 8.25F));

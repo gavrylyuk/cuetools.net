@@ -47,6 +47,9 @@ namespace JDP
             var original = new Button { Text = "Original mode", DialogResult = DialogResult.No }; original.SetBounds(310, 191, 115, 32);
             var cancel = new Button { Text = "Cancel", DialogResult = DialogResult.Cancel }; cancel.SetBounds(436, 191, 115, 32);
             setup.Controls.AddRange(new Control[] { start, original, cancel }); setup.AcceptButton = start; setup.CancelButton = cancel;
+            using var setupTips = new ToolTip(); UiHelp.Attach(setup, setupTips);
+            setupTips.SetToolTip(count, "Maximum number of simultaneous track encoding and checking workers."); setupTips.SetToolTip(temp, "Local folder for temporary uncompressed track files.");
+            setupTips.SetToolTip(start, "Start the experimental parallel conversion."); setupTips.SetToolTip(original, "Use the original conversion pipeline."); setupTips.SetToolTip(cancel, "Close without starting a conversion.");
             var result = setup.ShowDialog(this);
             if (result == DialogResult.Cancel) return false;
             if (result == DialogResult.No) return true;
@@ -141,6 +144,8 @@ namespace JDP
             close.Click += (s, e) => { if (batch.Finished) Close(); else Hide(); };
             FormClosing += (s, e) => { if (!batch.Finished) { e.Cancel = true; Hide(); } };
             layout.Controls.Add(summary, 0, 0); layout.Controls.Add(source, 0, 1); layout.Controls.Add(grid, 0, 2); layout.Controls.Add(note, 0, 3); layout.Controls.Add(buttons, 0, 4); Controls.Add(layout);
+            var tips = new ToolTip(); Disposed += (s, e) => tips.Dispose(); UiHelp.Attach(this, tips);
+            tips.SetToolTip(grid, "Review albums and track stages; hover a track for its output path."); tips.SetToolTip(pause, "Pause or resume the batch."); tips.SetToolTip(stopAlbum, "Stop the current album and continue to the next."); tips.SetToolTip(stopAll, "Stop the batch and keep completed albums."); tips.SetToolTip(deleteAll, "Stop and roll back this batch; approved overwritten files are restored."); tips.SetToolTip(close, "Hide the queue while it runs, or close it when finished.");
             timer.Tick += (s, e) => RefreshProgress(); timer.Start(); RefreshProgress();
         }
         private void Row(string key, string job, string stage, string progress, string details, string tooltip = null, bool album = false)

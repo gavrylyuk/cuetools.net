@@ -20,11 +20,17 @@ namespace JDP
 		public frmSettings() 
         {
 			InitializeComponent();
+#if NET10_0_OR_GREATER
+            UiHelp.Attach(this, toolTip1);
+#endif
 		}
 
         public frmSettings(AudioEncoderSettingsViewModel encoder)
         {
             InitializeComponent();
+#if NET10_0_OR_GREATER
+            UiHelp.Attach(this, toolTip1);
+#endif
             m_encoder = encoder;
         }
 

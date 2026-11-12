@@ -7,6 +7,9 @@ namespace JDP
 		public frmAbout()
 		{
 			InitializeComponent();
+#if NET10_0_OR_GREATER
+            UiHelp.Attach(this);
+#endif
 		}
 
 		private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
