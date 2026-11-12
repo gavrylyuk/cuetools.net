@@ -120,9 +120,6 @@
   <data name="btnCancel.Text" xml:space="preserve">
     <value>Abbrechen</value>
   </data>
-  <data name="checkBoxCheckForUpdates.Text" xml:space="preserve">
-    <value>Auf Aktualisierungen prüfen</value>
-  </data>
   <data name="checkBoxSeparateDecodingThread.Text" xml:space="preserve">
     <value>In eigenem Thread dekodieren</value>
   </data>
@@ -174,9 +171,6 @@
   </data>
   <data name="chkReducePriority.ToolTip" xml:space="preserve">
     <value>Prozesspriorität reduzieren, indem Leerlaufzeit zum Arbeiten genutzt wird.</value>
-  </data>
-  <data name="checkBoxCheckForUpdates.ToolTip" xml:space="preserve">
-    <value>Beim Start des Programms auf Aktualisierungen prüfen</value>
   </data>
   <data name="chkTruncateExtra4206Samples.Text" xml:space="preserve">
     <value>Nullsamples abschneiden, falls vorhanden</value>

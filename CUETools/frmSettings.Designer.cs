@@ -33,7 +33,6 @@ namespace JDP
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmSettings));
             this.grpGeneral = new System.Windows.Forms.GroupBox();
             this.checkBoxSeparateDecodingThread = new System.Windows.Forms.CheckBox();
-            this.checkBoxCheckForUpdates = new System.Windows.Forms.CheckBox();
             this.chkAllowMultipleInstances = new System.Windows.Forms.CheckBox();
             this.chkReducePriority = new System.Windows.Forms.CheckBox();
             this.chkTruncateExtra4206Samples = new System.Windows.Forms.CheckBox();
@@ -225,7 +224,6 @@ namespace JDP
             // grpGeneral
             // 
             this.grpGeneral.Controls.Add(this.checkBoxSeparateDecodingThread);
-            this.grpGeneral.Controls.Add(this.checkBoxCheckForUpdates);
             this.grpGeneral.Controls.Add(this.chkAllowMultipleInstances);
             this.grpGeneral.Controls.Add(this.chkReducePriority);
             this.grpGeneral.Controls.Add(this.chkTruncateExtra4206Samples);
@@ -245,12 +243,7 @@ namespace JDP
             this.toolTip1.SetToolTip(this.checkBoxSeparateDecodingThread, resources.GetString("checkBoxSeparateDecodingThread.ToolTip"));
             this.checkBoxSeparateDecodingThread.UseVisualStyleBackColor = true;
             // 
-            // checkBoxCheckForUpdates
             // 
-            resources.ApplyResources(this.checkBoxCheckForUpdates, "checkBoxCheckForUpdates");
-            this.checkBoxCheckForUpdates.Name = "checkBoxCheckForUpdates";
-            this.toolTip1.SetToolTip(this.checkBoxCheckForUpdates, resources.GetString("checkBoxCheckForUpdates.ToolTip"));
-            this.checkBoxCheckForUpdates.UseVisualStyleBackColor = true;
             // 
             // chkAllowMultipleInstances
             // 
@@ -1558,7 +1551,6 @@ namespace JDP
         private System.Windows.Forms.RadioButton rbGapsAppended;
         private System.Windows.Forms.RadioButton rbGapsLeftOut;
         private System.Windows.Forms.RadioButton rbGapsPrepended;
-        private System.Windows.Forms.CheckBox checkBoxCheckForUpdates;
         private System.Windows.Forms.BindingSource cUEConfigBindingSource;
         private System.Windows.Forms.BindingSource encodersBindingSource;
         private System.Windows.Forms.ListBox listBoxEncoders;

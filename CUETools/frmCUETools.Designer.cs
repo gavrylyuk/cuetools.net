@@ -570,7 +570,6 @@ namespace JDP {
             this.pictureBoxMotd.Name = "pictureBoxMotd";
             this.tableLayoutPanel2.SetRowSpan(this.pictureBoxMotd, 2);
             this.pictureBoxMotd.TabStop = false;
-            this.pictureBoxMotd.Click += new System.EventHandler(this.pictureBoxMotd_Click);
             // 
             // grpOutputPathGeneration
             // 

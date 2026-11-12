@@ -183,39 +183,6 @@
   <data name="&gt;&gt;checkBoxSeparateDecodingThread.ZOrder" xml:space="preserve">
     <value>0</value>
   </data>
-  <data name="checkBoxCheckForUpdates.AutoSize" type="System.Boolean, mscorlib">
-    <value>True</value>
-  </data>
-  <data name="checkBoxCheckForUpdates.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
-    <value>NoControl</value>
-  </data>
-  <data name="checkBoxCheckForUpdates.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 55</value>
-  </data>
-  <data name="checkBoxCheckForUpdates.Size" type="System.Drawing.Size, System.Drawing">
-    <value>114, 17</value>
-  </data>
-  <data name="checkBoxCheckForUpdates.TabIndex" type="System.Int32, mscorlib">
-    <value>2</value>
-  </data>
-  <data name="checkBoxCheckForUpdates.Text" xml:space="preserve">
-    <value>Check for updates</value>
-  </data>
-  <data name="checkBoxCheckForUpdates.ToolTip" xml:space="preserve">
-    <value>Check for updates</value>
-  </data>
-  <data name="&gt;&gt;checkBoxCheckForUpdates.Name" xml:space="preserve">
-    <value>checkBoxCheckForUpdates</value>
-  </data>
-  <data name="&gt;&gt;checkBoxCheckForUpdates.Type" xml:space="preserve">
-    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;checkBoxCheckForUpdates.Parent" xml:space="preserve">
-    <value>grpGeneral</value>
-  </data>
-  <data name="&gt;&gt;checkBoxCheckForUpdates.ZOrder" xml:space="preserve">
-    <value>1</value>
-  </data>
   <data name="chkAllowMultipleInstances.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>

@@ -15,7 +15,7 @@ public class ParallelFlacTests
     private string root;
     internal static CUEConfig Config()
     {
-        var config = new CUEConfig { detectHDCD = false, createEACLOG = false, checkForUpdates = false, trackFilenameFormat = "%tracknumber%. %title%", writeArLogOnConvert = false };
+        var config = new CUEConfig { detectHDCD = false, createEACLOG = false, trackFilenameFormat = "%tracknumber%. %title%", writeArLogOnConvert = false };
         config.formats["flac"].encoderLossless = new AudioEncoderSettingsViewModel(new CUETools.Codecs.CommandLine.EncoderSettings("flac.exe", "flac", true, "0 1 2 3 4 5 6 7 8", "8", Environment.GetEnvironmentVariable("CUETOOLS_TEST_FLAC") ?? "flac.exe", "-%M -P %P - -o %O"));
         config.formats["flac"].decoder = new AudioDecoderSettingsViewModel(new CUETools.Codecs.libFLAC.DecoderSettings());
         config.formats["ape"].encoderLossless = new AudioEncoderSettingsViewModel(new CUETools.Codecs.MACLib.EncoderSettings());

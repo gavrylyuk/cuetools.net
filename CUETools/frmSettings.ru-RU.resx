@@ -479,12 +479,6 @@ HTOA - зазор перед первым треком сохраняется в
   <data name="checkBox1.Text" xml:space="preserve">
     <value>Проверить</value>
   </data>
-  <data name="checkBoxCheckForUpdates.Text" xml:space="preserve">
-    <value>Проверять обновления</value>
-  </data>
-  <data name="checkBoxCheckForUpdates.ToolTip" xml:space="preserve">
-    <value>Проверять обновления при запуске программы</value>
-  </data>
   <data name="checkBoxCopyAlbumArt.Text" xml:space="preserve">
     <value>Копировать теги обложек альбомов</value>
   </data>
