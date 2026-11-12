@@ -621,6 +621,11 @@ namespace CUETools.Processor
             return !string.IsNullOrWhiteSpace(value) && value.Length <= 32 &&
                 value.All(ch => ch >= ' ' && ch <= '~' && ch != '.' && "<>:\"/\\|?*".IndexOf(ch) < 0);
         }
+        public bool ShouldChooseBatchArtwork(object[] choices)
+        {
+            return chooseMetadataForEachAlbum && choices != null && choices.Length > 0 && choices[0] is TagLib.IPicture;
+        }
+
         public bool ShouldChooseAlbumMetadata(bool isEncoding, bool editTags, int remainingAlbums, int processedAlbums)
         {
             return isEncoding && (chooseMetadataForEachAlbum || (editTags && remainingAlbums <= 1 && processedAlbums == 0));

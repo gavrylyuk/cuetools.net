@@ -20,6 +20,12 @@ public class BatchMetadataSettingsTests
         Assert.IsTrue(config.ShouldChooseAlbumMetadata(true, false, 2, 0));
         Assert.IsTrue(config.ShouldChooseAlbumMetadata(true, false, 1, 1));
         Assert.IsFalse(config.ShouldChooseAlbumMetadata(false, true, 2, 0));
+        Assert.IsTrue(config.ShouldChooseBatchArtwork(new object[] { new TagLib.Picture() }));
+        Assert.IsFalse(config.ShouldChooseBatchArtwork(new object[] { new object() }));
+        Assert.IsFalse(config.ShouldChooseBatchArtwork(Array.Empty<object>()));
+        config.chooseMetadataForEachAlbum = false;
+        Assert.IsFalse(config.ShouldChooseBatchArtwork(new object[] { new TagLib.Picture() }));
+        config.chooseMetadataForEachAlbum = true;
         Assert.IsTrue(new CUEConfig(config).chooseMetadataForEachAlbum);
     }
     [TestMethod]

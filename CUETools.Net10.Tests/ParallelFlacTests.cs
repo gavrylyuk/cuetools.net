@@ -223,6 +223,38 @@ public class ParallelFlacTests
         Assert.AreEqual(title, tagged.Tag.Title);
     }
     [TestMethod]
+    public void EmbeddedAndFolderArtworkAreBothAvailableForAlbumSelection()
+    {
+        var config = Config(); config.chooseMetadataForEachAlbum = true;
+        config.advanced.coversSearch = CUEConfigAdvanced.CTDBCoversSearch.None;
+        string input = Cue(config, "flac", false);
+        using var embeddedImage = new System.Drawing.Bitmap(8, 8);
+        using var folderImage = new System.Drawing.Bitmap(10, 10);
+        folderImage.SetPixel(0, 0, System.Drawing.Color.Red);
+        using var embeddedBytes = new MemoryStream(); embeddedImage.Save(embeddedBytes, System.Drawing.Imaging.ImageFormat.Png);
+        folderImage.Save(Path.Combine(root, "folder.png"), System.Drawing.Imaging.ImageFormat.Png);
+        using (var source = TagLib.File.Create(Path.Combine(root, "source.flac")))
+        {
+            source.Tag.Pictures = new TagLib.IPicture[] { new TagLib.Picture(new TagLib.ByteVector(embeddedBytes.ToArray())) { MimeType = "image/png", Type = TagLib.PictureType.FrontCover, Description = "embedded" } };
+            source.Save();
+        }
+        var cue = new CUESheet(config) { Action = CUEAction.Encode, OutputStyle = CUEStyle.GapsAppended };
+        int prompts = 0;
+        cue.CUEToolsSelection += (sender, args) => {
+            if (args.choices.Length == 0 || !(args.choices[0] is TagLib.IPicture)) { args.selection = 0; return; }
+            prompts++;
+            Assert.IsTrue(args.choices.Length >= 2, "Both embedded and local folder artwork should be offered.");
+            args.selection = Array.FindIndex(args.choices, x => ((TagLib.IPicture)x).Description.Contains("folder.png"));
+            Assert.IsTrue(args.selection >= 0, "Local folder artwork was not offered.");
+        };
+        try {
+            cue.Open(input); cue.LoadAndResizeAlbumArt();
+            Assert.AreEqual(1, prompts);
+            Assert.AreEqual(1, cue.AlbumArt.Count);
+            StringAssert.Contains(cue.AlbumArt[0].Description, "folder.png");
+        } finally { cue.Close(); }
+    }
+    [TestMethod]
     public void EncoderFailurePublishesNothingAndReleasesTemporaryFiles()
     {
         var config=Config();string input=Cue(config,"wav",false);((CUETools.Codecs.CommandLine.EncoderSettings)config.formats["flac"].encoderLossless.Settings).Parameters="--cuetools-invalid-test-option %I -o %O";

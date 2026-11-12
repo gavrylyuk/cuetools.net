@@ -35,6 +35,7 @@ namespace CUETools.Processor
         private bool _hasHTOAFilename = false, _hasTrackFilenames = false, _hasSingleFilename = false, _appliedWriteOffset;
         private bool _hasEmbeddedCUESheet;
         private bool _hasEmbeddedArtwork;
+        private bool _userSelectedArtwork;
         private bool _paddedToFrame, _truncated4608, _usePregapForFirstTrackInSingleFile;
         private int _writeOffset;
         private CUEAction _action;
@@ -561,6 +562,7 @@ namespace CUETools.Processor
             hdcdDecoder = null;
             _hasEmbeddedCUESheet = false;
             _hasEmbeddedArtwork = false;
+            _userSelectedArtwork = false;
             _isArchive = false;
             _isCD = false;
             _useLocalDB = false;
@@ -1817,13 +1819,14 @@ namespace CUETools.Processor
             _albumArt.Add(picture);
             // Keep the explicit choice instead of replacing it with embedded or online art.
             _hasEmbeddedArtwork = true;
+            _userSelectedArtwork = true;
         }
 
         public void LoadAndResizeAlbumArt()
         {
             if (Action != CUEAction.Encode)
                 return;
-            if (!_hasEmbeddedArtwork)
+            if (!_hasEmbeddedArtwork || (_config.chooseMetadataForEachAlbum && CUEToolsSelection != null && !_userSelectedArtwork))
             {
                 var images = Metadata.AlbumArt;
                 var primaryImages = images.FindAll(x => x.primary);
@@ -1861,7 +1864,7 @@ namespace CUETools.Processor
                 }
                 CheckStop();
 
-                if (_albumArt.Count != 1 || _albumArt[0].Type != TagLib.PictureType.FrontCover)
+                if ((_config.chooseMetadataForEachAlbum && CUEToolsSelection != null) || _albumArt.Count != 1 || _albumArt[0].Type != TagLib.PictureType.FrontCover)
                 {
                     if (_albumArt.Count == 0 || CUEToolsSelection == null)
                     {
@@ -3107,7 +3110,7 @@ namespace CUETools.Processor
                     }
             }
 
-            if (_hasEmbeddedArtwork) return;
+            if (_hasEmbeddedArtwork && !(_config.chooseMetadataForEachAlbum && CUEToolsSelection != null)) return;
 
             bool isValidName = true;
             if ((_config.extractAlbumArt || _config.embedAlbumArt) && !_isCD)

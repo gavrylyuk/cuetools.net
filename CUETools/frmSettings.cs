@@ -89,9 +89,9 @@ namespace JDP
             replaceInvalidWithSpaceCheckBox.CheckedChanged += (sender, e) => invalidFilenameReplacementBox.Enabled = !replaceInvalidWithSpaceCheckBox.Checked;
             grpAudioFilenames.Controls.Add(label); grpAudioFilenames.Controls.Add(invalidFilenameReplacementBox); grpAudioFilenames.Controls.Add(replaceInvalidWithSpaceCheckBox);
             toolTip1.SetToolTip(replaceInvalidWithSpaceCheckBox, "Replace invalid filename characters with spaces instead of the selected symbol.");
-            chooseMetadataForEachAlbumCheckBox = new CheckBox { Name = "chooseMetadataForEachAlbumCheckBox", Text = "Choose metadata for each album", AutoSize = false, Size = new Size(210, 38), Location = new Point(6, 154) };
+            chooseMetadataForEachAlbumCheckBox = new CheckBox { Name = "chooseMetadataForEachAlbumCheckBox", Text = "Choose metadata and cover for each album", AutoSize = false, Size = new Size(210, 38), Location = new Point(6, 154) };
             groupBoxTagging.Controls.Add(chooseMetadataForEachAlbumCheckBox);
-            toolTip1.SetToolTip(chooseMetadataForEachAlbumCheckBox, "Show the metadata selection dialog for every album before encoding, including batches. Cancel stops the batch.");
+            toolTip1.SetToolTip(chooseMetadataForEachAlbumCheckBox, "Choose metadata and available artwork for each album, including batches. Canceling metadata selection stops the batch.");
             toolTip1.SetToolTip(invalidFilenameReplacementBox, "Replacement text for invalid filename characters, such as / or :. Spaces are preserved. Default: _.");
         }
 #endif
