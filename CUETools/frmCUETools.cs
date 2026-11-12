@@ -63,6 +63,7 @@ namespace JDP
             InitializeComponent();
 #if NET10_0_OR_GREATER
             if (File.Exists(Path.Combine(AppContext.BaseDirectory, "parallel_experiment"))) Text += " · Parallel Experimental";
+            fileSystemTreeView1.ShowNodeToolTips = false;
             UiHelp.Attach(this, toolTip1); UiHelp.AddMenu(toolStripMenu, this);
 #endif
             //splitContainer1.AutoScaleMode = AutoScaleMode.Font;

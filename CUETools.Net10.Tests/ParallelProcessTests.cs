@@ -64,6 +64,41 @@ public class ParallelProcessTests
         batch.Finish();
     }
     [TestMethod]
+    [DataRow("-8 -P %P - -o %O")]
+    [DataRow("-8 -P %P %I -o %O")]
+    [DataRow("-8 -c -")]
+    public void LongOutputPathsArePassedToExternalEncoder(string parameters)
+    {
+        var config=ParallelFlacTests.Config();
+        ((CUETools.Codecs.CommandLine.EncoderSettings)config.formats["flac"].encoderLossless.Settings).Parameters=parameters;
+        string directory=Path.Combine(root,new string('a',90),new string('b',90));
+        Directory.CreateDirectory(directory);
+        string output=Path.Combine(directory,new string('c',70)+".flac");
+        Assert.IsTrue(output.Length > 260, "The test output must exceed the Windows path limit.");
+        using var batch=new ParallelConversionBatch(1,directory);
+        using(var session=new ParallelFlacSession(batch,config,Path.Combine(root,"album.cue"),44100))
+        {
+            Write(session.CreateDest(output,AudioPCMConfig.RedBook,44100,4096),1);
+            session.Complete(); Assert.IsTrue(batch.Snapshot().Single().Tracks.Single().Complete);
+        }
+        Assert.IsTrue(File.Exists(output)); batch.Finish();
+    }
+
+    [TestMethod]
+    public void EncoderFailureReportsItsStderrRatherThanJustBrokenPipe()
+    {
+        var config=ParallelFlacTests.Config();
+        ((CUETools.Codecs.CommandLine.EncoderSettings)config.formats["flac"].encoderLossless.Settings).Parameters="--cuetools-invalid-test-option - -o %O";
+        using var batch=new ParallelConversionBatch(1,root);
+        using(var session=new ParallelFlacSession(batch,config,Path.Combine(root,"album.cue"),44100L*30))
+        {
+            Write(session.CreateDest(Path.Combine(root,"out.flac"),AudioPCMConfig.RedBook,44100L*30,4096),30);
+            var error=Assert.Throws<IOException>(()=>session.Complete());
+            StringAssert.Contains(error.ToString(), "--cuetools-invalid-test-option");
+        }
+        batch.Finish();
+    }
+    [TestMethod]
     [DataRow(16)]
     [DataRow(24)]
     public void PcmVerificationSupportsOutputBitDepth(int bits)

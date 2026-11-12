@@ -378,9 +378,29 @@ namespace CUETools.Processor
         }
         private async Task Encode(ExternalSettings settings, ParallelTrackProgress track, string wav)
         {
+            // flac.exe can treat the question mark in an extended input path as a
+            // wildcard. File-input templates need a short temporary input path.
+            if (!OperatingSystem.IsWindows() || !settings.Parameters.Contains("%I") || Path.GetFullPath(wav).Length < 248)
+            {
+                await EncodeCore(settings, track, wav).ConfigureAwait(false);
+                return;
+            }
+            string alias = Path.Combine(Path.GetTempPath(), "cuetools-input-" + Guid.NewGuid().ToString("N") + ".wav");
+            if (Path.GetFullPath(alias).Length >= 248) throw new IOException("The system temporary folder is too long for file-based encoder input.");
+            try
+            {
+                using (var source = File.OpenRead(wav))
+                using (var destination = new FileStream(alias, FileMode.CreateNew, FileAccess.Write, FileShare.Read))
+                    await source.CopyToAsync(destination, cancellation.Token).ConfigureAwait(false);
+                await EncodeCore(settings, track, alias).ConfigureAwait(false);
+            }
+            finally { try { File.Delete(alias); } catch { } }
+        }
+        private async Task EncodeCore(ExternalSettings settings, ParallelTrackProgress track, string wav)
+        {
             bool fromFile = settings.Parameters.Contains("%I"), toFile = settings.Parameters.Contains("%O");
             using var process = new Process();
-            process.StartInfo = new ProcessStartInfo(settings.Path, settings.Parameters.Replace("%O", Quote(track.Output)).Replace("%I", Quote(wav)).Replace("%M", settings.EncoderMode).Replace("%P", settings.Padding.ToString()))
+            process.StartInfo = new ProcessStartInfo(settings.Path, settings.Parameters.Replace("%O", Quote(EncoderPath(track.Output))).Replace("%I", Quote(EncoderPath(wav))).Replace("%M", settings.EncoderMode).Replace("%P", settings.Padding.ToString()))
             { UseShellExecute = false, CreateNoWindow = true, RedirectStandardInput = !fromFile, RedirectStandardOutput = !toFile, RedirectStandardError = true };
             var errors = new StringBuilder();
             batch.Track(track, "Encoding");
@@ -414,8 +434,11 @@ namespace CUETools.Processor
                     await process.StandardOutput.BaseStream.CopyToAsync(file, cancellation.Token).ConfigureAwait(false);
                 });
                 await process.WaitForExitAsync(cancellation.Token).ConfigureAwait(false);
-                await Task.WhenAll(input, output, stderr).ConfigureAwait(false);
-                if (process.ExitCode != 0) throw new IOException("flac.exe exit code " + process.ExitCode + ": " + errors.ToString());
+                Exception streamError = null;
+                try { await Task.WhenAll(input, output, stderr).ConfigureAwait(false); }
+                catch (Exception error) when (!cancellation.IsCancellationRequested) { streamError = error; }
+                if (process.ExitCode != 0) throw new IOException("Encoder exit code " + process.ExitCode + ": " + errors.ToString().Trim(), streamError);
+                if (streamError != null) throw new IOException("Encoder stream failed: " + streamError.Message, streamError);
             }
             finally
             {
@@ -424,6 +447,14 @@ namespace CUETools.Processor
                 try { await Task.WhenAll(input, output, stderr).ConfigureAwait(false); } catch { }
                 batch.Unregister(process); lock (processes) processes.Remove(process);
             }
+        }
+        // Some Windows command-line encoders need an extended-length path.
+        private static string EncoderPath(string path)
+        {
+            if (!OperatingSystem.IsWindows() || path.StartsWith(@"\\?\")) return path;
+            string full = Path.GetFullPath(path);
+            if (full.Length < 248) return path;
+            return full.StartsWith(@"\\") ? @"\\?\UNC\" + full.Substring(2) : @"\\?\" + full;
         }
         private static string Quote(string path) => "\"" + path + "\"";
         public void Complete()
