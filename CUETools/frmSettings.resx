@@ -646,6 +646,9 @@ You can set up foobar2000 to show those values, and see if your music was ripped
   <data name="chkEncodeWhenZeroOffset.Size" type="System.Drawing.Size, System.Drawing">
     <value>104, 19</value>
   </data>
+  <data name="chkEncodeWhenZeroOffset.Text" xml:space="preserve">
+    <value>Require zero offset</value>
+  </data>
   <data name="chkEncodeWhenZeroOffset.TabIndex" type="System.Int32, mscorlib">
     <value>6</value>
   </data>
