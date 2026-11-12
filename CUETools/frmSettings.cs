@@ -18,6 +18,8 @@ namespace JDP
         private AudioEncoderSettingsViewModel m_encoder;
 #if NET10_0_OR_GREATER
         private TextBox invalidFilenameReplacementBox;
+        private CheckBox replaceInvalidWithSpaceCheckBox;
+        private CheckBox chooseMetadataForEachAlbumCheckBox;
 #endif
 
 		public frmSettings() 
@@ -78,10 +80,16 @@ namespace JDP
             btnOK.Anchor = cancelButton.Anchor = AnchorStyles.Bottom;
             cancelButton.Left = ClientSize.Width / 2 + 5; btnOK.Left = cancelButton.Left - btnOK.Width - 8;
             btnOK.Top = cancelButton.Top = ClientSize.Height - btnOK.Height - 7;
-            grpAudioFilenames.Height += 40; labelLanguage.Top += 40; comboLanguage.Top += 40;
+            grpAudioFilenames.Height += 68; labelLanguage.Top += 68; comboLanguage.Top += 68;
             var label = new Label { Text = "Replace invalid with:", AutoSize = true, Location = new Point(12, 212) };
             invalidFilenameReplacementBox = new TextBox { Name = "invalidFilenameReplacementBox", MaxLength = 1, Location = new Point(176, 209), Width = 45 };
-            grpAudioFilenames.Controls.Add(label); grpAudioFilenames.Controls.Add(invalidFilenameReplacementBox);
+            replaceInvalidWithSpaceCheckBox = new CheckBox { Name = "replaceInvalidWithSpaceCheckBox", Text = "Replace with space", AutoSize = true, Location = new Point(12, 238) };
+            replaceInvalidWithSpaceCheckBox.CheckedChanged += (sender, e) => invalidFilenameReplacementBox.Enabled = !replaceInvalidWithSpaceCheckBox.Checked;
+            grpAudioFilenames.Controls.Add(label); grpAudioFilenames.Controls.Add(invalidFilenameReplacementBox); grpAudioFilenames.Controls.Add(replaceInvalidWithSpaceCheckBox);
+            toolTip1.SetToolTip(replaceInvalidWithSpaceCheckBox, "Replace invalid filename characters with spaces instead of the selected symbol.");
+            chooseMetadataForEachAlbumCheckBox = new CheckBox { Name = "chooseMetadataForEachAlbumCheckBox", Text = "Choose metadata for each album", AutoSize = false, Size = new Size(210, 38), Location = new Point(6, 154) };
+            groupBoxTagging.Controls.Add(chooseMetadataForEachAlbumCheckBox);
+            toolTip1.SetToolTip(chooseMetadataForEachAlbumCheckBox, "Show the metadata selection dialog for every album before encoding, including batches. Cancel stops the batch.");
             toolTip1.SetToolTip(invalidFilenameReplacementBox, "Replacement for invalid filename characters, such as / or :. Default: _. Use a visible ASCII character valid in Windows filenames.");
         }
 #endif
@@ -107,6 +115,9 @@ namespace JDP
 			chkReplaceSpaces.Checked = _config.replaceSpaces;
 #if NET10_0_OR_GREATER
             invalidFilenameReplacementBox.Text = _config.invalidFilenameReplacement;
+            replaceInvalidWithSpaceCheckBox.Checked = _config.replaceInvalidWithSpace;
+            chooseMetadataForEachAlbumCheckBox.Checked = _config.chooseMetadataForEachAlbum;
+            invalidFilenameReplacementBox.Enabled = !replaceInvalidWithSpaceCheckBox.Checked;
 #endif
 			chkWriteArLogOnConvert.Checked = _config.writeArLogOnConvert;
 			chkWriteARLogOnVerify.Checked = _config.writeArLogOnVerify;
@@ -234,13 +245,16 @@ namespace JDP
 		private void btnOK_Click(object sender, EventArgs e)
 		{
 #if NET10_0_OR_GREATER
-            if (!CUEConfig.IsValidFilenameReplacement(invalidFilenameReplacementBox.Text))
+            if (!replaceInvalidWithSpaceCheckBox.Checked && !CUEConfig.IsValidFilenameReplacement(invalidFilenameReplacementBox.Text))
             {
                 DialogResult = DialogResult.None;
                 MessageBox.Show(this, "Choose one visible ASCII character that is valid in Windows filenames, such as _, comma, or hyphen.", "Invalid replacement", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 invalidFilenameReplacementBox.Focus(); return;
             }
-            _config.invalidFilenameReplacement = invalidFilenameReplacementBox.Text;
+            _config.replaceInvalidWithSpace = replaceInvalidWithSpaceCheckBox.Checked;
+            _config.chooseMetadataForEachAlbum = chooseMetadataForEachAlbumCheckBox.Checked;
+            if (CUEConfig.IsValidFilenameReplacement(invalidFilenameReplacementBox.Text))
+                _config.invalidFilenameReplacement = invalidFilenameReplacementBox.Text;
 #endif
 			if (listViewFormats.SelectedIndices.Count > 0)
 				listViewFormats.Items[listViewFormats.SelectedIndices[0]].Selected = false;
