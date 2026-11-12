@@ -166,7 +166,7 @@ GAPS, PREGAP AND OFFSET
 Settings controls whether track gaps are appended, prepended or omitted, and how hidden track one audio is handled. Pregap and data-track fields describe disc layout; offset changes sample alignment. Alter these only when you understand the source and intended output: they can change track boundaries or verification results.
 
 SETTINGS
-General settings include language, filenames, gap handling, CUE and playlist creation, HDCD, artwork, metadata and verification logs. Formats assigns decoders, encoders and taggers to extensions. Encoders and Decoders configure built-in or external tools. External command-line templates use placeholders; consult their field descriptions and the tool's own documentation. Advanced settings expose additional options; select a property to read its description. Changes may affect later conversions.
+General settings include language, filenames, gap handling, CUE and playlist creation, HDCD, artwork, metadata and verification logs. Replace invalid with chooses the character used for filename characters that Windows does not allow; the default is underscore. Replace spaces with underscores remains a separate option. Formats assigns decoders, encoders and taggers to extensions. Encoders and Decoders configure built-in or external tools. External command-line templates use placeholders; consult their field descriptions and the tool's own documentation. Advanced settings expose additional options; select a property to read its description. Changes may affect later conversions.
 
 THEME AND HELP
 Choose Theme > System, Light, or Dark and restart CUETools. Dark mode availability depends on Windows. Press F1 in the main or settings window to reopen this guide. Hover a control for a short description.

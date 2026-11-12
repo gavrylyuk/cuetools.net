@@ -37,6 +37,7 @@ namespace CUETools.Processor
         public bool removeSpecial;
         public string specialExceptions;
         public bool replaceSpaces;
+        public string invalidFilenameReplacement;
         public bool embedLog;
         public bool extractLog;
         public bool alwaysWriteUTF8CUEFile;
@@ -109,6 +110,7 @@ namespace CUETools.Processor
             removeSpecial = false;
             specialExceptions = "-()";
             replaceSpaces = false;
+            invalidFilenameReplacement = "_";
             embedLog = true;
             extractLog = true;
             alwaysWriteUTF8CUEFile = false;
@@ -198,6 +200,7 @@ namespace CUETools.Processor
             removeSpecial = src.removeSpecial;
             specialExceptions = src.specialExceptions;
             replaceSpaces = src.replaceSpaces;
+            invalidFilenameReplacement = src.invalidFilenameReplacement;
             embedLog = src.embedLog;
             extractLog = src.extractLog;
             alwaysWriteUTF8CUEFile = src.alwaysWriteUTF8CUEFile;
@@ -288,6 +291,7 @@ namespace CUETools.Processor
             sw.Save("RemoveSpecialCharacters", removeSpecial);
             sw.Save("SpecialCharactersExceptions", specialExceptions);
             sw.Save("ReplaceSpaces", replaceSpaces);
+            sw.Save("InvalidFilenameReplacement", invalidFilenameReplacement);
             sw.Save("EmbedLog", embedLog);
             sw.Save("ExtractLog", extractLog);
             sw.Save("AlwaysWriteUTF8CUEFile", alwaysWriteUTF8CUEFile);
@@ -396,6 +400,8 @@ namespace CUETools.Processor
             removeSpecial = sr.LoadBoolean("RemoveSpecialCharacters") ?? false;
             specialExceptions = sr.Load("SpecialCharactersExceptions") ?? "-()";
             replaceSpaces = sr.LoadBoolean("ReplaceSpaces") ?? false;
+            string replacement = sr.Load("InvalidFilenameReplacement");
+            invalidFilenameReplacement = IsValidFilenameReplacement(replacement) ? replacement : "_";
             embedLog = sr.LoadBoolean("EmbedLog") ?? true;
             extractLog = sr.LoadBoolean("ExtractLog") ?? true;
             alwaysWriteUTF8CUEFile = sr.LoadBoolean("AlwaysWriteUTF8CUEFile") ?? false;
@@ -562,6 +568,12 @@ namespace CUETools.Processor
             return proxy;
         }
 
+        // Restrict the replacement to a portable, visible ASCII filename character.
+        public static bool IsValidFilenameReplacement(string value)
+        {
+            return value != null && value.Length == 1 && value[0] >= '!' && value[0] <= '~'
+                && value[0] != '.' && "<>:\"/\\|?*".IndexOf(value[0]) < 0;
+        }
         public string CleanseString(string s)
         {
             StringBuilder sb = new StringBuilder();
@@ -573,13 +585,13 @@ namespace CUETools.Processor
             for (int i = 0; i < s.Length; i++)
             {
                 char ch = s[i];
-                if (filenamesANSISafe && removeSpecial && specialExceptions.IndexOf(ch) < 0 && !(
+                if (Array.IndexOf(invalid, ch) >= 0)
+                    sb.Append(IsValidFilenameReplacement(invalidFilenameReplacement) ? invalidFilenameReplacement : "_");
+                else if ((replaceSpaces && ch == ' ') || (filenamesANSISafe && removeSpecial && specialExceptions.IndexOf(ch) < 0 && !(
                     ((ch >= 'a') && (ch <= 'z')) ||
                     ((ch >= 'A') && (ch <= 'Z')) ||
                     ((ch >= '0') && (ch <= '9')) ||
-                    (ch == ' ') || (ch == '_')))
-                    ch = '_';
-                if ((Array.IndexOf(invalid, ch) >= 0) || (replaceSpaces && ch == ' '))
+                    (ch == ' ') || (ch == '_'))))
                     sb.Append("_");
                 else
                     sb.Append(ch);
