@@ -16,12 +16,15 @@ namespace JDP
 		CUEConfig _config;
 		private IIconManager m_icon_mgr;
         private AudioEncoderSettingsViewModel m_encoder;
+#if NET10_0_OR_GREATER
+        private TextBox invalidFilenameReplacementBox;
+#endif
 
 		public frmSettings() 
         {
 			InitializeComponent();
 #if NET10_0_OR_GREATER
-            UiHelp.Attach(this, toolTip1);
+            InitializeFilenameReplacementSetting(); UiHelp.Attach(this, toolTip1);
 #endif
 		}
 
@@ -29,7 +32,7 @@ namespace JDP
         {
             InitializeComponent();
 #if NET10_0_OR_GREATER
-            UiHelp.Attach(this, toolTip1);
+            InitializeFilenameReplacementSetting(); UiHelp.Attach(this, toolTip1);
 #endif
             m_encoder = encoder;
         }
@@ -46,6 +49,24 @@ namespace JDP
 			}
 		}	
 
+#if NET10_0_OR_GREATER
+        private void InitializeFilenameReplacementSetting()
+        {
+            Font = new Font(Font.FontFamily, 9F, Font.Style);
+            FormBorderStyle = FormBorderStyle.Sizable; MinimumSize = new Size(680, 440); ClientSize = new Size(720, 480);
+            tabControl1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tabControl1.Size = new Size(ClientSize.Width, ClientSize.Height - 42);
+            var cancelButton = (Button)CancelButton;
+            btnOK.Anchor = cancelButton.Anchor = AnchorStyles.Bottom;
+            cancelButton.Left = ClientSize.Width / 2 + 5; btnOK.Left = cancelButton.Left - btnOK.Width - 8;
+            btnOK.Top = cancelButton.Top = ClientSize.Height - btnOK.Height - 7;
+            grpAudioFilenames.Height += 40; labelLanguage.Top += 40; comboLanguage.Top += 40;
+            var label = new Label { Text = "Replace invalid with:", AutoSize = true, Location = new Point(12, 212) };
+            invalidFilenameReplacementBox = new TextBox { Name = "invalidFilenameReplacementBox", MaxLength = 1, Location = new Point(176, 209), Width = 45 };
+            grpAudioFilenames.Controls.Add(label); grpAudioFilenames.Controls.Add(invalidFilenameReplacementBox);
+            toolTip1.SetToolTip(invalidFilenameReplacementBox, "Replacement for invalid filename characters, such as / or :. Default: _. Use a visible ASCII character valid in Windows filenames.");
+        }
+#endif
 		private void frmSettings_Load(object sender, EventArgs e) 
 		{
 			cUEConfigBindingSource.DataSource = _config;
@@ -67,6 +88,9 @@ namespace JDP
 			chkRemoveSpecial.Checked = _config.removeSpecial;
 			txtSpecialExceptions.Text = _config.specialExceptions;
 			chkReplaceSpaces.Checked = _config.replaceSpaces;
+#if NET10_0_OR_GREATER
+            invalidFilenameReplacementBox.Text = _config.invalidFilenameReplacement;
+#endif
 			chkWriteArLogOnConvert.Checked = _config.writeArLogOnConvert;
 			chkWriteARLogOnVerify.Checked = _config.writeArLogOnVerify;
 			chkEmbedLog.Checked = _config.embedLog;
@@ -192,6 +216,15 @@ namespace JDP
 
 		private void btnOK_Click(object sender, EventArgs e)
 		{
+#if NET10_0_OR_GREATER
+            if (!CUEConfig.IsValidFilenameReplacement(invalidFilenameReplacementBox.Text))
+            {
+                DialogResult = DialogResult.None;
+                MessageBox.Show(this, "Choose one visible ASCII character that is valid in Windows filenames, such as _, comma, or hyphen.", "Invalid replacement", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                invalidFilenameReplacementBox.Focus(); return;
+            }
+            _config.invalidFilenameReplacement = invalidFilenameReplacementBox.Text;
+#endif
 			if (listViewFormats.SelectedIndices.Count > 0)
 				listViewFormats.Items[listViewFormats.SelectedIndices[0]].Selected = false;
 

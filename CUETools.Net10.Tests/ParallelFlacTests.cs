@@ -158,6 +158,33 @@ public class ParallelFlacTests
         config.specialExceptions="-(),";Assert.AreEqual("First, second",config.CleanseString("First, second"));
     }
     [TestMethod]
+    public void InvalidFilenameReplacementDefaultsValidatesAndPersists()
+    {
+        var config=Config();Assert.AreEqual("_",config.invalidFilenameReplacement);
+        Assert.AreEqual("6_8 - 7_8",config.CleanseString("6/8 - 7/8"));
+        config.invalidFilenameReplacement=",";Assert.AreEqual("6,8 - 7,8",config.CleanseString("6/8 - 7/8"));
+        config.replaceSpaces=true;Assert.AreEqual("6,8_-_7,8",config.CleanseString("6/8 - 7/8"));
+        config.replaceSpaces=false;config.removeSpecial=true;config.specialExceptions="-()";Assert.AreEqual("6,8 - 7,8",config.CleanseString("6/8 - 7/8"));
+        Assert.AreEqual(",",new CUEConfig(config).invalidFilenameReplacement);
+        foreach(var value in new[]{"", "/", "?", ".", " ", "ab", "é"}) Assert.IsFalse(CUEConfig.IsValidFilenameReplacement(value),value);
+        foreach(var value in new[]{"_", ",", "-", "+"}) Assert.IsTrue(CUEConfig.IsValidFilenameReplacement(value),value);
+        string appPath=Path.Combine(root,"app.exe");var writer=new CUETools.Processor.Settings.SettingsWriter("Test", "settings.txt",appPath);
+        config.Save(writer);writer.Close();var loaded=Config();loaded.Load(new CUETools.Processor.Settings.SettingsReader("Test", "settings.txt",appPath));
+        Assert.AreEqual(",",loaded.invalidFilenameReplacement);
+        writer=new CUETools.Processor.Settings.SettingsWriter("Test", "settings.txt",appPath);writer.Save("InvalidFilenameReplacement","/");writer.Close();
+        loaded.Load(new CUETools.Processor.Settings.SettingsReader("Test", "settings.txt",appPath));Assert.AreEqual("_",loaded.invalidFilenameReplacement);
+    }
+    [TestMethod]
+    public void ChosenReplacementIsUsedInAudioFilenameAndCueButNotTrackTag()
+    {
+        var config=Config();config.invalidFilenameReplacement=",";string input=Cue(config,"wav",false);
+        File.WriteAllText(input,File.ReadAllText(input).Replace("Song 1","6/8 - 7/8"));
+        string destination=Path.Combine(root,"output");var files=Convert(config,input,destination,true,CUEStyle.GapsAppended,0);
+        Assert.AreEqual("01. 6,8 - 7,8.flac",Path.GetFileName(files[0]));Assert.IsTrue(File.Exists(files[0]));
+        StringAssert.Contains(File.ReadAllText(Path.Combine(destination,"album.cue")),"\"01. 6,8 - 7,8.flac\"");
+        using var tagged=TagLib.File.Create(files[0]);Assert.AreEqual("6/8 - 7/8",tagged.Tag.Title);
+    }
+    [TestMethod]
     public void EncoderFailurePublishesNothingAndReleasesTemporaryFiles()
     {
         var config=Config();string input=Cue(config,"wav",false);((CUETools.Codecs.CommandLine.EncoderSettings)config.formats["flac"].encoderLossless.Settings).Parameters="--cuetools-invalid-test-option %I -o %O";
