@@ -150,8 +150,7 @@ namespace JDP
         }
         private void Row(string key, string job, string stage, string progress, string details, string tooltip = null, bool album = false)
         {
-            if (!rows.TryGetValue(key, out var row)) { int index = grid.Rows.Add(); row = grid.Rows[index]; rows.Add(key, row); }
-            if (row.Index != renderIndex) { grid.Rows.Remove(row); grid.Rows.Insert(renderIndex, row); }
+            if (!rows.TryGetValue(key, out var row)) { grid.Rows.Insert(renderIndex, 1); row = grid.Rows[renderIndex]; rows.Add(key, row); }
             renderIndex++;
             row.SetValues(job, stage, progress, details); row.Cells[0].ToolTipText = tooltip ?? key;
             row.Cells[3].ToolTipText = details;
@@ -168,7 +167,7 @@ namespace JDP
             renderIndex = 0;
             foreach (var album in albums)
             {
-                Row(album.Input, Path.GetFileName(album.Input), album.Stage, album.Fraction.ToString("P0"), album.Error ?? "", album: true);
+                Row(album.Input, Path.GetFileName(Path.GetDirectoryName(album.Input)) + " · " + Path.GetFileName(album.Input), album.Stage, album.Fraction.ToString("P0"), album.Error ?? "", album: true);
                 foreach (var track in album.Tracks) Row(album.Input + "|" + track.Output, "    " + Path.GetFileName(track.Output), track.Stage, track.Stage == "Encoding" && track.Percent == 0 ? "—" : track.Percent.ToString("P0"), track.Error ?? "", track.DisplayOutput ?? track.Output);
             }
             if (!string.IsNullOrEmpty(batch.CleanupError)) Row("cleanup", "Cleanup", "Needs attention", "", batch.CleanupError);

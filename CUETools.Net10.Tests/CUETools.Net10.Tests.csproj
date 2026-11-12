@@ -16,6 +16,7 @@
     <ProjectReference Include="..\CUETools.Codecs.MACLib\CUETools.Codecs.MACLib.csproj" />
     <ProjectReference Include="..\CUETools.Codecs.libwavpack\CUETools.Codecs.libwavpack.csproj" />
     <ProjectReference Include="..\CUETools.Processor\CUETools.Processor.csproj" />
+    <ProjectReference Include="..\CUETools\CUETools.Net10.csproj" />
     <Compile Include="..\CUETools\SingletonController.Net10.cs" Link="SingletonController.cs" />
   </ItemGroup>
   <ItemGroup>
