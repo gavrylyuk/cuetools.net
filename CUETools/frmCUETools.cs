@@ -543,7 +543,7 @@ namespace JDP
                 _workThread.IsBackground = true;
                 _workThread.Start(p);
 #if NET10_0_OR_GREATER
-                if (parallelQueue != null && !parallelQueue.Visible) parallelQueue.Show(this);
+                if (parallelQueue != null && !parallelQueue.Visible) ShowParallelQueue();
 #endif
             }
             catch (Exception ex)

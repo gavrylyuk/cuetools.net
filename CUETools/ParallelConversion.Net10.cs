@@ -73,13 +73,21 @@ namespace JDP
                     {
                         args.Cancel = true; parallelCloseRequested = true;
                         parallelBatch.Cancel(false); _workClass?.Stop();
-                        parallelQueue?.Show(this);
+                        ShowParallelQueue();
                     }
                 };
-                toolStripStatusLabel1.Click += (sender, args) => { if (parallelQueue != null) { parallelQueue.Show(this); parallelQueue.Activate(); } };
+                toolStripStatusLabel1.Click += (sender, args) => ShowParallelQueue();
             }
+            bool dark = Application.ColorMode == SystemColorMode.Dark || (Application.ColorMode == SystemColorMode.System && Application.SystemColorMode == SystemColorMode.Dark);
+            var linkColor = ParallelQueueForm.StatusLinkColor(dark, SystemInformation.HighContrast);
+            toolStripStatusLabel1.LinkColor = toolStripStatusLabel1.ActiveLinkColor = toolStripStatusLabel1.VisitedLinkColor = linkColor;
             toolStripStatusLabel1.IsLink = true;
             return true;
+        }
+        private void ShowParallelQueue()
+        {
+            if (parallelQueue == null || parallelQueue.IsDisposed) return;
+            ParallelQueueForm.ShowOrActivate(parallelQueue, this);
         }
         private string RunParallelAlbum(CUESheet cue, string input, string output, string[] overwriteApproved, AudioEncoderType type, string format)
         {
@@ -147,6 +155,14 @@ namespace JDP
             var tips = new ToolTip(); Disposed += (s, e) => tips.Dispose(); UiHelp.Attach(this, tips);
             tips.SetToolTip(grid, "Review albums and track stages; hover a track for its output path."); tips.SetToolTip(pause, "Pause or resume the batch."); tips.SetToolTip(stopAlbum, "Stop the current album and continue to the next."); tips.SetToolTip(stopAll, "Stop the batch and keep completed albums."); tips.SetToolTip(deleteAll, "Stop and roll back this batch; approved overwritten files are restored."); tips.SetToolTip(close, "Hide the queue while it runs, or close it when finished.");
             timer.Tick += (s, e) => RefreshProgress(); timer.Start(); RefreshProgress();
+        }
+        internal static Color StatusLinkColor(bool dark, bool highContrast) => highContrast ? SystemColors.HotTrack : dark ? Color.WhiteSmoke : Color.Black;
+        internal static void ShowOrActivate(Form queue, IWin32Window owner)
+        {
+            if (queue == null || queue.IsDisposed) return;
+            if (!queue.Visible) queue.Show(owner);
+            if (queue.WindowState == FormWindowState.Minimized) queue.WindowState = FormWindowState.Normal;
+            queue.Activate();
         }
         private void Row(string key, string job, string stage, string progress, string details, string tooltip = null, bool album = false)
         {

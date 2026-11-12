@@ -38,4 +38,33 @@ public class ParallelQueueUiTests
         thread.IsBackground=true; thread.SetApartmentState(ApartmentState.STA); thread.Start(); Assert.IsTrue(thread.Join(TimeSpan.FromSeconds(20)),"Queue test timed out.");
         if(failure!=null) throw new AssertFailedException("Queue update failed",failure);
     }
+    [TestMethod]
+    public void StatusLinkShowsVisibleHiddenAndFinishedQueueSafely()
+    {
+        Exception failure = null;
+        var thread = new Thread(() => {
+            string dir=Path.Combine(Path.GetTempPath(),"cuetools-link-test-"+Guid.NewGuid().ToString("N")); Directory.CreateDirectory(dir);
+            try {
+                using var batch=new ParallelConversionBatch(1,dir);
+                using var owner=new Form { ShowInTaskbar=false, StartPosition=FormStartPosition.Manual, Location=new System.Drawing.Point(-32000,-32000) };
+                var type=Assembly.Load("CUETools").GetType("JDP.ParallelQueueForm",true);
+                using var queue=(Form)Activator.CreateInstance(type,BindingFlags.Instance|BindingFlags.NonPublic,null,new object[]{batch,(Action)(()=>{}),(Action<bool>)(_=>{})},null);
+                queue.ShowInTaskbar=false; queue.StartPosition=FormStartPosition.Manual; queue.Location=new System.Drawing.Point(-32000,-32000);
+                var show=type.GetMethod("ShowOrActivate",BindingFlags.Static|BindingFlags.NonPublic);
+                show.Invoke(null,new object[]{queue,owner}); Assert.IsTrue(queue.Visible);
+                show.Invoke(null,new object[]{queue,owner}); Assert.IsTrue(queue.Visible);
+                queue.WindowState=FormWindowState.Minimized; show.Invoke(null,new object[]{queue,owner}); Assert.AreEqual(FormWindowState.Normal,queue.WindowState);
+                queue.Hide(); Assert.IsFalse(queue.Visible); show.Invoke(null,new object[]{queue,owner}); Assert.IsTrue(queue.Visible);
+                batch.Finish(); show.Invoke(null,new object[]{queue,owner}); Assert.IsTrue(queue.Visible);
+                var color=type.GetMethod("StatusLinkColor",BindingFlags.Static|BindingFlags.NonPublic);
+                Assert.AreEqual(System.Drawing.Color.WhiteSmoke,color.Invoke(null,new object[]{true,false}));
+                Assert.AreEqual(System.Drawing.Color.Black,color.Invoke(null,new object[]{false,false}));
+                Assert.AreEqual(System.Drawing.SystemColors.HotTrack,color.Invoke(null,new object[]{true,true}));
+                queue.Close(); Assert.IsTrue(queue.IsDisposed); show.Invoke(null,new object[]{queue,owner});
+            } catch(Exception error){failure=error;} finally{Directory.Delete(dir,true);}
+        });
+        thread.IsBackground=true; thread.SetApartmentState(ApartmentState.STA); thread.Start(); Assert.IsTrue(thread.Join(TimeSpan.FromSeconds(30)),"Status link test timed out.");
+        if(failure!=null) throw new AssertFailedException("Status link failed",failure);
+    }
+
 }
