@@ -52,6 +52,21 @@ namespace JDP
 #if NET10_0_OR_GREATER
         private void InitializeFilenameReplacementSetting()
         {
+            // Let the actual tab content use the extra space when the window is resized.
+            propertyGrid1.Dock = DockStyle.Fill; tabPage7.Padding = new Padding(8);
+            listViewFormats.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+            groupBoxFormat.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            comboFormatLosslessEncoder.Anchor = comboFormatLossyEncoder.Anchor = comboFormatDecoder.Anchor = comboBoxFormatTagger.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            groupBoxTagging.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+            groupBoxAlbumArt.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tableLayoutPanel3.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            grpAudioFilenames.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            txtSingleFilenameFormat.Anchor = txtTrackFilenameFormat.Anchor = txtSpecialExceptions.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox4.Anchor = groupBox5.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            grpHDCD.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            groupBoxExternalEncoder.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tableLayoutPanel4.RowStyles[0].SizeType = tableLayoutPanel5.RowStyles[0].SizeType = SizeType.Absolute;
+            tableLayoutPanel4.RowStyles[0].Height = tableLayoutPanel5.RowStyles[0].Height = 44;
             Font = new Font(Font.FontFamily, 9F, Font.Style);
             FormBorderStyle = FormBorderStyle.Sizable; MinimumSize = new Size(680, 440); ClientSize = new Size(720, 480);
             tabControl1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
@@ -73,7 +88,6 @@ namespace JDP
 			encodersBindingSource.DataMember = "Encoders"; // for MONO bug (setting BindingSource.DataSource clears DataMember:(
 			propertyGrid1.SelectedObject = _config.advanced;
 			chkReducePriority.Checked = _reducePriority;
-			checkBoxCheckForUpdates.Checked = _config.checkForUpdates;
 			chkAutoCorrectFilenames.Checked = _config.autoCorrectFilenames;
 			numFixWhenConfidence.Value = _config.fixOffsetMinimumConfidence;
 			numFixWhenPercent.Value = _config.fixOffsetMinimumTracksPercent;
@@ -229,7 +243,6 @@ namespace JDP
 				listViewFormats.Items[listViewFormats.SelectedIndices[0]].Selected = false;
 
 			_reducePriority = chkReducePriority.Checked;
-			_config.checkForUpdates = checkBoxCheckForUpdates.Checked;
 			_config.preserveHTOA = rbGapsPlusHTOA.Checked;
 			_config.useHTOALengthThreshold = chkUseHTOALengthThreshold.Checked;
 			_config.gapsHandling = rbGapsPrepended.Checked ? CUEStyle.GapsPrepended :
@@ -505,7 +518,8 @@ namespace JDP
 			}
 			else
 			{
-				CUEToolsFormat format = _config.formats[encoder.Extension]; // _config.formats.TryGetValue(encoder.extension, out format)
+				CUEToolsFormat format = null;
+                if (!string.IsNullOrEmpty(encoder.Extension)) _config.formats.TryGetValue(encoder.Extension, out format);
 				labelEncoderExtension.Visible = true;
 				comboBoxEncoderExtension.Visible = true;
 				comboBoxEncoderExtension.Enabled = encoder.CanBeDeleted;
@@ -546,7 +560,8 @@ namespace JDP
             if (decoder == null)
             {
                 labelDecoderExtension.Visible =
-                comboBoxDecoderExtension.Visible = false;
+                comboBoxDecoderExtension.Visible =
+                groupBoxExternalDecoder.Visible = false;
             }
             else
             {
@@ -595,10 +610,11 @@ namespace JDP
 			var encoder = encodersBindingSource.Current as AudioEncoderSettingsViewModel;
 			if (encoder == null || !encoder.CanBeDeleted)
 				return;
-			if (_config.formats[encoder.Extension].encoderLossless == encoder)
-				_config.formats[encoder.Extension].encoderLossless = null;
-			if (_config.formats[encoder.Extension].encoderLossy == encoder)
-				_config.formats[encoder.Extension].encoderLossy = null;
+            foreach (var format in _config.formats.Values)
+            {
+                if (format.encoderLossless == encoder) format.encoderLossless = null;
+                if (format.encoderLossy == encoder) format.encoderLossy = null;
+            }
 			encodersBindingSource.RemoveCurrent();
         }
 
@@ -612,8 +628,8 @@ namespace JDP
             var decoder = bindingSourceDecoders.Current as AudioDecoderSettingsViewModel;
             if (decoder == null || !decoder.CanBeDeleted)
                 return;
-            if (_config.formats[decoder.Extension].decoder == decoder)
-                _config.formats[decoder.Extension].decoder = null;
+            foreach (var format in _config.formats.Values)
+                if (format.decoder == decoder) format.decoder = null;
             bindingSourceDecoders.RemoveCurrent();
         }
 	}

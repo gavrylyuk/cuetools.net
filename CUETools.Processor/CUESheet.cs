@@ -3169,6 +3169,17 @@ namespace CUETools.Processor
         }
 
 #if NET47 || NET20 || (NET10_0_OR_GREATER && WINDOWS)
+        public static void SaveJpegAtMaximumQuality(Image image, Stream output)
+        {
+            var codec = Array.Find(System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders(),
+                item => item.FormatID == System.Drawing.Imaging.ImageFormat.Jpeg.Guid);
+            using (var parameters = new System.Drawing.Imaging.EncoderParameters(1))
+            {
+                parameters.Param[0] = new System.Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 100L);
+                image.Save(output, codec, parameters);
+            }
+        }
+
         public void ResizeAlbumArt()
         {
             if (_albumArt == null)
@@ -3186,9 +3197,7 @@ namespace CUETools.Processor
                                 using (Bitmap small = resizeImage(img, new Size(_config.maxAlbumArtSize, _config.maxAlbumArtSize)))
                                 using (MemoryStream encoded = new MemoryStream())
                                 {
-                                    //System.Drawing.Imaging.EncoderParameters encoderParams = new EncoderParameters(1);
-                                    //encoderParams.Param[0] = new System.Drawing.Imaging.EncoderParameter(Encoder.Quality, quality);
-                                    small.Save(encoded, System.Drawing.Imaging.ImageFormat.Jpeg);
+                                    SaveJpegAtMaximumQuality(small, encoded);
                                     picture.Data = new TagLib.ByteVector(encoded.ToArray());
                                     picture.MimeType = "image/jpeg";
                                 }

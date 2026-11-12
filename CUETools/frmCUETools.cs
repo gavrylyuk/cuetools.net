@@ -51,6 +51,7 @@ namespace JDP
         {
             _profile = _defaultProfile = new CUEToolsProfile("default");
             InitializeComponent();
+            Text = "CUETools";
 #if NET10_0_OR_GREATER
             if (File.Exists(Path.Combine(AppContext.BaseDirectory, "ui_preview"))) Text += " · UI Preview";
             fileSystemTreeView1.ShowNodeToolTips = false;
@@ -394,29 +395,6 @@ namespace JDP
             if (_reducePriority)
                 Process.GetCurrentProcess().PriorityClass = System.Diagnostics.ProcessPriorityClass.Idle;
 
-            motdImage = null;
-            if (File.Exists(MOTDImagePath))
-                using (FileStream imageStream = new FileStream(MOTDImagePath, FileMode.Open, FileAccess.Read))
-                    try { motdImage = Image.FromStream(imageStream); }
-                    catch { }
-
-            if (File.Exists(MOTDTextPath))
-                try
-                {
-                    using (StreamReader sr = new StreamReader(MOTDTextPath, Encoding.UTF8))
-                    {
-                        string version = sr.ReadLine();
-                        if (string.Compare(version, MOTDVersion) > 0)
-                        {
-                            string motd = sr.ReadToEnd();
-                            _batchReport = new StringBuilder();
-                            _batchReport.Append(motd);
-                            ReportState = true;
-                        }
-                    }
-                }
-                catch { }
-
             SetupControls(false);
             UpdateOutputPath();
             updateOutputStyles();
@@ -466,8 +444,6 @@ namespace JDP
         bool _reportState = true;
         CorrectorModeEnum _correctorMode;
         DateTime _startedAt;
-        DateTime lastMOTD;
-        Image motdImage = null;
         string profilePath;
         string[] OutputPathUseTemplates = {
             "%music%\\Converted\\%artist%\\[%year% - ]%album%[ '('disc %discnumberandname%')'][' ('%releasedateandlabel%')'][' ('%unique%')']\\%artist% - %album%.cue",
@@ -607,30 +583,6 @@ namespace JDP
             _batchReport.Append("\r\n");
         }
 
-        string MOTDImagePath
-        {
-            get
-            {
-                return System.IO.Path.Combine(profilePath, "motd.jpg");
-            }
-        }
-
-        string MOTDTextPath
-        {
-            get
-            {
-                return System.IO.Path.Combine(profilePath, "motd.txt");
-            }
-        }
-
-        string MOTDVersion
-        {
-            get
-            {
-                return "CUETools 2.2.6";
-            }
-        }
-
         private void WriteAudioFilesThread(object o)
         {
             object[] p = (object[])o;
@@ -652,96 +604,6 @@ namespace JDP
 
             try
             {
-                if (_profile._config.checkForUpdates && DateTime.UtcNow - lastMOTD > TimeSpan.FromDays(1) && _batchReport.Length == 0)
-                {
-                    this.Invoke((MethodInvoker)(() => toolStripStatusLabel1.Text = "Checking for updates..."));
-                    IWebProxy proxy = _profile._config.GetProxy();
-                    HttpWebRequest req = (HttpWebRequest)WebRequest.Create("http://cuetools.net/motd/motd.jpg");
-                    req.Proxy = proxy;
-                    req.Method = "GET";
-                    try
-                    {
-                        using (HttpWebResponse resp = (HttpWebResponse)req.GetResponse())
-                            if (resp.StatusCode == HttpStatusCode.OK)
-                            {
-                                using (Stream respStream = resp.GetResponseStream())
-                                using (FileStream motd = new FileStream(MOTDImagePath, FileMode.Create, FileAccess.Write))
-                                {
-                                    byte[] buff = new byte[0x8000];
-                                    do
-                                    {
-                                        int count = respStream.Read(buff, 0, buff.Length);
-                                        if (count == 0) break;
-                                        motd.Write(buff, 0, count);
-                                    } while (true);
-                                }
-                            }
-                            else
-                            {
-                                File.Delete(MOTDImagePath);
-                            }
-                        lastMOTD = DateTime.UtcNow;
-                    }
-                    catch (WebException ex)
-                    {
-                        if (ex.Status == WebExceptionStatus.ProtocolError && ex.Response != null && ex.Response is HttpWebResponse)
-                        {
-                            HttpWebResponse resp = (HttpWebResponse)ex.Response;
-                            if (resp.StatusCode == HttpStatusCode.NotFound)
-                            {
-                                File.Delete(MOTDImagePath);
-                                lastMOTD = DateTime.UtcNow;
-                            }
-                        }
-                    }
-
-                    motdImage = null;
-                    if (File.Exists(MOTDImagePath))
-                        using (FileStream imageStream = new FileStream(MOTDImagePath, FileMode.Open, FileAccess.Read))
-                            try { motdImage = Image.FromStream(imageStream); }
-                            catch { }
-
-                    req = (HttpWebRequest)WebRequest.Create("http://cuetools.net/motd/motd.txt");
-                    req.Proxy = proxy;
-                    req.Method = "GET";
-                    try
-                    {
-                        using (HttpWebResponse resp = (HttpWebResponse)req.GetResponse())
-                        {
-                            if (resp.StatusCode == HttpStatusCode.OK)
-                            {
-                                using (Stream respStream = resp.GetResponseStream())
-                                using (FileStream motd = new FileStream(MOTDTextPath, FileMode.Create, FileAccess.Write))
-                                using (StreamReader sr = new StreamReader(respStream, Encoding.UTF8))
-                                using (StreamWriter sw = new StreamWriter(motd, Encoding.UTF8))
-                                {
-                                    string motdText = sr.ReadToEnd();
-                                    sw.Write(motdText);
-                                }
-                            }
-                            else
-                            {
-                                File.Delete(MOTDTextPath);
-                            }
-                        }
-                        lastMOTD = DateTime.UtcNow;
-                    }
-                    catch { }
-                    if (File.Exists(MOTDTextPath))
-                        try
-                        {
-                            using (StreamReader sr = new StreamReader(MOTDTextPath, Encoding.UTF8))
-                            {
-                                string version = sr.ReadLine();
-                                if (string.Compare(version, MOTDVersion) > 0)
-                                {
-                                    string motd = sr.ReadToEnd();
-                                    _batchReport.Append(motd);
-                                }
-                            }
-                        }
-                        catch { }
-                }
                 if (action == CUEAction.CreateDummyCUE)
                 {
                     if (Directory.Exists(pathIn))
@@ -1010,7 +872,7 @@ namespace JDP
                             if (dlgRes != DialogResult.Cancel && cueSheet.AlbumArt.Count != 0)
                                 pictureBoxMotd.Image = cueSheet.Cover;
                             else
-                                pictureBoxMotd.Image = motdImage;
+                                pictureBoxMotd.Image = null;
                         });
 
                         if (dlgRes == DialogResult.Cancel)
@@ -1054,7 +916,7 @@ namespace JDP
                         {
                             this.Invoke((MethodInvoker)delegate ()
                             {
-                                pictureBoxMotd.Image = cueSheet.Cover ?? motdImage;
+                                pictureBoxMotd.Image = cueSheet.Cover;
                             });
                             cueSheet.UsePregapForFirstTrackInSingleFile = _usePregapForFirstTrackInSingleFile && !outputAudio;
                             if (script == null || script.name == "default")
@@ -1305,7 +1167,7 @@ namespace JDP
             if (!running)
             {
                 UpdateActions();
-                pictureBoxMotd.Image = motdImage;
+                pictureBoxMotd.Image = null;
                 toolStripStatusLabelProcessed.Text = "";
             }
 
@@ -1442,7 +1304,6 @@ namespace JDP
             SettingsReader sr = new SettingsReader("CUE Tools", "settings.txt", Application.ExecutablePath);
             profilePath = sr.ProfilePath;
             _profile.Load(sr);
-            lastMOTD = sr.LoadDate("LastMOTD") ?? DateTime.FromBinary(0);
             _choiceWidth = sr.LoadInt32("ChoiceWidth", null, null) ?? 0;
             _choiceHeight = sr.LoadInt32("ChoiceHeight", null, null) ?? 0;
             _choiceMaxed = sr.LoadBoolean("ChoiceMaxed") ?? false;
@@ -1499,7 +1360,6 @@ namespace JDP
 
             SettingsWriter sw = new SettingsWriter("CUE Tools", "settings.txt", Application.ExecutablePath);
             SaveScripts(SelectedAction);
-            sw.Save("LastMOTD", lastMOTD);
             sw.Save("ChoiceWidth", _choiceWidth);
             sw.Save("ChoiceHeight", _choiceHeight);
             sw.Save("ChoiceMaxed", _choiceMaxed);
@@ -2684,12 +2544,6 @@ namespace JDP
         {
             CorrectorMode = e.ClickedItem == toolStripMenuItemCorrectorModeChangeExtension ?
                 CorrectorModeEnum.Extension : CorrectorModeEnum.Locate;
-        }
-
-        private void pictureBoxMotd_Click(object sender, EventArgs e)
-        {
-            if (motdImage != null && pictureBoxMotd.Image == motdImage)
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("http://www.cuetools.net/doku.php/cuetools:download") { UseShellExecute = true });
         }
 
         private void checkBoxUseAccurateRip_CheckedChanged(object sender, EventArgs e)

@@ -58,7 +58,6 @@ namespace CUETools.Processor
         public bool decodeHDCDtoLW16;
         public bool decodeHDCDto24bit;
         public bool oneInstance;
-        public bool checkForUpdates;
         public string language;
         public Dictionary<string, CUEToolsScript> scripts;
         public string defaultVerifyScript;
@@ -132,7 +131,6 @@ namespace CUETools.Processor
             decodeHDCDto24bit = true;
 
             oneInstance = true;
-            checkForUpdates = true;
 
             writeBasicTagsFromCUEData = true;
             copyBasicTags = true;
@@ -140,7 +138,7 @@ namespace CUETools.Processor
             CopyAlbumArt = true;
             embedAlbumArt = true;
             extractAlbumArt = true;
-            maxAlbumArtSize = 300;
+            maxAlbumArtSize = 500;
 
             arLogToSourceFolder = false;
             arLogVerbose = true;
@@ -222,7 +220,6 @@ namespace CUETools.Processor
             decodeHDCDto24bit = src.decodeHDCDto24bit;
 
             oneInstance = src.oneInstance;
-            checkForUpdates = src.checkForUpdates;
 
             writeBasicTagsFromCUEData = src.writeBasicTagsFromCUEData;
             copyBasicTags = src.copyBasicTags;
@@ -312,7 +309,6 @@ namespace CUETools.Processor
             sw.Save("DecodeHDCDToLossyWAV16", decodeHDCDtoLW16);
             sw.Save("DecodeHDCDTo24bit", decodeHDCDto24bit);
             sw.Save("OneInstance", oneInstance);
-            sw.Save("CheckForUpdates", checkForUpdates);
             sw.Save("Language", language);
 
             sw.Save("SeparateDecodingThread", separateDecodingThread);
@@ -423,7 +419,6 @@ namespace CUETools.Processor
             decodeHDCDto24bit = sr.LoadBoolean("DecodeHDCDTo24bit") ?? true;
 
             oneInstance = sr.LoadBoolean("OneInstance") ?? true;
-            checkForUpdates = sr.LoadBoolean("CheckForUpdates") ?? true;
 
             writeBasicTagsFromCUEData = sr.LoadBoolean("WriteBasicTagsFromCUEData") ?? true;
             copyBasicTags = sr.LoadBoolean("CopyBasicTags") ?? true;
@@ -462,6 +457,10 @@ namespace CUETools.Processor
                         throw new Exception();
                     advanced = jsonObject as CUEConfigAdvanced;
 
+                    // Old settings can contain empty command-line placeholder records.
+                    // Preserve partial definitions; they may be user work in progress.
+                    advanced.encoders.RemoveAll(IsEmptyExternalEncoder);
+                    advanced.decoders.RemoveAll(IsEmptyExternalDecoder);
                     // Add missing codecs
                     backup.encoders.Where(x => advanced.encoders
                         .FindAll(y => y.Extension == x.Extension && y.Lossless == x.Lossless && y.Name == x.Name).Count == 0)
@@ -568,6 +567,19 @@ namespace CUETools.Processor
             return proxy;
         }
 
+        private static bool IsEmptyExternalEncoder(IAudioEncoderSettings value)
+        {
+            var item = value as CUETools.Codecs.CommandLine.EncoderSettings;
+            return item != null && string.IsNullOrWhiteSpace(item.Name) && string.IsNullOrWhiteSpace(item.Extension)
+                && string.IsNullOrWhiteSpace(item.Path) && string.IsNullOrWhiteSpace(item.Parameters)
+                && string.IsNullOrWhiteSpace(item.SupportedModes) && string.IsNullOrWhiteSpace(item.EncoderMode);
+        }
+        private static bool IsEmptyExternalDecoder(IAudioDecoderSettings value)
+        {
+            var item = value as CUETools.Codecs.CommandLine.DecoderSettings;
+            return item != null && string.IsNullOrWhiteSpace(item.Name) && string.IsNullOrWhiteSpace(item.Extension)
+                && string.IsNullOrWhiteSpace(item.Path) && string.IsNullOrWhiteSpace(item.Parameters);
+        }
         // Restrict the replacement to a portable, visible ASCII filename character.
         public static bool IsValidFilenameReplacement(string value)
         {

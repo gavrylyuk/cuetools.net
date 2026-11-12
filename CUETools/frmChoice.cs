@@ -174,7 +174,7 @@ namespace JDP
             {
                 using (MemoryStream encoded = new MemoryStream())
                 {
-                    pictureBox1.Image.Save(encoded, System.Drawing.Imaging.ImageFormat.Jpeg);
+                    CUESheet.SaveJpegAtMaximumQuality(pictureBox1.Image, encoded);
                     picture.Data = new TagLib.ByteVector(encoded.ToArray());
                     picture.MimeType = "image/jpeg";
                 }
