@@ -16,6 +16,9 @@ namespace JDP
 		public frmBatch()
 		{
 			InitializeComponent();
+#if NET10_0_OR_GREATER
+            UiHelp.Attach(this);
+#endif
 			_batchPaths = new List<string>();
 		}
 

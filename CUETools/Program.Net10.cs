@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -16,6 +16,7 @@ namespace JDP
 		[STAThread]
 		static void Main(string[] args)
 		{
+			Application.SetColorMode(UiHelp.LoadTheme());
 			if (args.Length > 1 && args[0].Length > 1 && args[0][0] == '/')
 			{
 				Application.SetDefaultFont(new System.Drawing.Font("Microsoft Sans Serif", 8.25F));
@@ -50,6 +51,7 @@ namespace JDP
 			}
 
 			string myId = "BZ92759C-63Q7-444e-ADA6-E495634A493D";
+            if (File.Exists(Path.Combine(AppContext.BaseDirectory, "ui_preview"))) myId += "-ui-preview";
 			Application.SetDefaultFont(new System.Drawing.Font("Microsoft Sans Serif", 8.25F));
             Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);

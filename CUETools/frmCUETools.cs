@@ -51,6 +51,10 @@ namespace JDP
         {
             _profile = _defaultProfile = new CUEToolsProfile("default");
             InitializeComponent();
+#if NET10_0_OR_GREATER
+            if (File.Exists(Path.Combine(AppContext.BaseDirectory, "ui_preview"))) Text += " · UI Preview";
+            UiHelp.Attach(this, toolTip1); UiHelp.AddMenu(toolStripMenu, this);
+#endif
             //splitContainer1.AutoScaleMode = AutoScaleMode.Font;
             if (Type.GetType("Mono.Runtime", false) == null)
                 m_icon_mgr = new CUEControls.ShellIconMgr();

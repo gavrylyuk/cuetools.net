@@ -17,6 +17,9 @@ namespace JDP
         public frmChoice()
         {
             InitializeComponent();
+#if NET10_0_OR_GREATER
+            UiHelp.Attach(this, toolTip1);
+#endif
         }
 
         public CUESheet CUE;

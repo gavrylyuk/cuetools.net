@@ -7,6 +7,9 @@ namespace JDP
 		public frmPassword()
 		{
 			InitializeComponent();
+#if NET10_0_OR_GREATER
+            UiHelp.Attach(this);
+#endif
 		}
 	}
 }
