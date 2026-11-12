@@ -15,7 +15,7 @@ namespace CUETools.Net10.Tests;
             string appPath=Path.Combine(dir,"app.exe");var writer=new SettingsWriter("Test","settings.txt",appPath);config.Save(writer);writer.Close();
             var loaded=new CUEConfig();loaded.Load(new SettingsReader("Test","settings.txt",appPath));Assert.AreEqual(",",loaded.invalidFilenameReplacement);
             writer=new SettingsWriter("Test","settings.txt",appPath);writer.Save("InvalidFilenameReplacement","/");writer.Close();loaded.Load(new SettingsReader("Test","settings.txt",appPath));Assert.AreEqual("_",loaded.invalidFilenameReplacement);
-            foreach(var bad in new[]{"", "/", "?", ".", " ", "ab", "é"}) Assert.IsFalse(CUEConfig.IsValidFilenameReplacement(bad),bad);
+            foreach(var bad in new[]{"", "/", "?", ".", " ", "é", new string('a', 33)}) Assert.IsFalse(CUEConfig.IsValidFilenameReplacement(bad),bad);
             config.replaceSpaces=true;Assert.AreEqual("6,8_-_7,8",config.CleanseString("6/8 - 7/8"));
             config.replaceSpaces=false;config.removeSpecial=true;config.specialExceptions="-()";Assert.AreEqual("6,8 - 7,8",config.CleanseString("6/8 - 7/8"));
         } finally { Directory.Delete(dir,true); }

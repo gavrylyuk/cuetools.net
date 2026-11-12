@@ -9,6 +9,10 @@ namespace CUETools.Codecs.CommandLine
     [JsonObject(MemberSerialization.OptIn)]
     public class DecoderSettings : IAudioDecoderSettings
     {
+        [DefaultValue("")]
+        [JsonProperty]
+        public string PresetId { get; set; }
+
         #region IAudioDecoderSettings implementation
         [DefaultValue("")]
         [JsonProperty]

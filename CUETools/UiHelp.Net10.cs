@@ -106,7 +106,6 @@ namespace JDP
                 case "checkBoxFormatAllowLossy": return "Allow this format to be used for lossy encoding.";
                 case "checkBoxFormatAllowLossless": return "Allow this format to be used for lossless encoding.";
                 case "checkBoxFormatEmbedCUESheet": return "Mark this format as supporting embedded CUE sheets.";
-                case "listViewFormats": return "Select an audio format to inspect its encoder, decoder and tagger.";
                 case "listBoxEncoders": return "Select an encoder to inspect or edit its settings.";
                 case "listBoxDecoders": return "Select a decoder to inspect or edit its settings.";
                 case "buttonEncoderAdd": return "Add an external encoder definition.";
@@ -166,7 +165,7 @@ GAPS, PREGAP AND OFFSET
 Settings controls whether track gaps are appended, prepended or omitted, and how hidden track one audio is handled. Pregap and data-track fields describe disc layout; offset changes sample alignment. Alter these only when you understand the source and intended output: they can change track boundaries or verification results.
 
 SETTINGS
-General settings include language, filenames, gap handling, CUE and playlist creation, HDCD, artwork, metadata and verification logs. Replace invalid with chooses the character used for filename characters that Windows does not allow; the default is underscore. Replace with space uses a space for invalid characters instead and disables the symbol field. Replace spaces with underscores remains a separate option. On the Tagging tab, Choose metadata for each album opens the match dialog for every album before encoding, including batches. Canceling the dialog stops the remaining batch. Formats assigns decoders, encoders and taggers to extensions. Encoders and Decoders configure built-in or external tools. External command-line templates use placeholders; consult their field descriptions and the tool's own documentation. Advanced settings expose additional options; select a property to read its description. Changes may affect later conversions.
+General settings include language, filenames, gap handling, CUE and playlist creation, HDCD, artwork, metadata and verification logs. Replace invalid with chooses the text used for filename characters that Windows does not allow; spaces around the text are preserved and the default is underscore. Replace with space uses a space for invalid characters instead and disables the symbol field. Replace spaces with underscores remains a separate option. On the Tagging tab, Choose metadata for each album opens the match dialog for every album before encoding, including batches. Canceling the dialog stops the remaining batch. Formats assigns decoders, encoders and taggers to extensions. Encoders and Decoders configure built-in or external tools. External command-line templates use placeholders; consult their field descriptions and the tool's own documentation. Advanced settings expose additional options; select a property to read its description. Changes may affect later conversions.
 
 THEME AND HELP
 Choose Theme > System, Light, or Dark and restart CUETools. Dark mode availability depends on Windows. Press F1 in the main or settings window to reopen this guide. Hover a control for a short description.

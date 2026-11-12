@@ -336,14 +336,6 @@ namespace CUETools.Processor
             sw.Save("ArLogFilenameFormat", ArLogFilenameFormat);
             sw.Save("AlArtFilenameFormat", AlArtFilenameFormat);
 
-            // Record only intentionally absent built-in command-line entries. New defaults
-            // can still be introduced by future versions without restoring deleted ones.
-            var defaults = CreateDefaultExternalCodecs();
-            var removedEncoders = defaults.encoders.Where(x => !advanced.encoders.Any(y => EncoderKey(x) == EncoderKey(y))).Select(EncoderKey).ToArray();
-            var removedDecoders = defaults.decoders.Where(x => !advanced.decoders.Any(y => DecoderKey(x) == DecoderKey(y))).Select(DecoderKey).ToArray();
-            sw.Save("RemovedDefaultExternalEncoders", JsonConvert.SerializeObject(removedEncoders));
-            sw.Save("RemovedDefaultExternalDecoders", JsonConvert.SerializeObject(removedDecoders));
-
             sw.SaveText("Advanced", JsonConvert.SerializeObject(advanced,
                 Newtonsoft.Json.Formatting.Indented,
                 new JsonSerializerSettings
@@ -479,16 +471,26 @@ namespace CUETools.Processor
                     // Preserve partial definitions; they may be user work in progress.
                     advanced.encoders.RemoveAll(IsEmptyExternalEncoder);
                     advanced.decoders.RemoveAll(IsEmptyExternalDecoder);
-                    // Preserve explicitly removed command-line defaults while still discovering
-                    // built-in plugins and defaults added after the settings were saved.
-                    var removedEncoders = LoadRemovedCodecKeys(sr.Load("RemovedDefaultExternalEncoders"));
-                    var removedDecoders = LoadRemovedCodecKeys(sr.Load("RemovedDefaultExternalDecoders"));
-                    backup.encoders.Where(x => !(x is CUETools.Codecs.CommandLine.EncoderSettings && removedEncoders.Contains(EncoderKey(x))) &&
-                        !advanced.encoders.Any(y => EncoderKey(y) == EncoderKey(x)))
-                        .ToList().ForEach(x => advanced.encoders.Add(x));
-                    backup.decoders.Where(x => !(x is CUETools.Codecs.CommandLine.DecoderSettings && removedDecoders.Contains(DecoderKey(x))) &&
-                        !advanced.decoders.Any(y => DecoderKey(y) == DecoderKey(x)))
-                        .ToList().ForEach(x => advanced.decoders.Add(x));
+                    // Restore missing defaults and mark legacy copies of presets. Preset IDs
+                    // remain stable even when their editable names or parameters change.
+                    foreach (var item in backup.encoders)
+                    {
+                        var preset = item as CUETools.Codecs.CommandLine.EncoderSettings;
+                        var existing = advanced.encoders.Find(x =>
+                            (preset != null && !string.IsNullOrEmpty(preset.PresetId) && x is CUETools.Codecs.CommandLine.EncoderSettings external && external.PresetId == preset.PresetId) ||
+                            EncoderKey(x) == EncoderKey(item));
+                        if (existing == null) advanced.encoders.Add(item);
+                        else if (preset != null && existing is CUETools.Codecs.CommandLine.EncoderSettings external && string.IsNullOrEmpty(external.PresetId)) external.PresetId = preset.PresetId;
+                    }
+                    foreach (var item in backup.decoders)
+                    {
+                        var preset = item as CUETools.Codecs.CommandLine.DecoderSettings;
+                        var existing = advanced.decoders.Find(x =>
+                            (preset != null && !string.IsNullOrEmpty(preset.PresetId) && x is CUETools.Codecs.CommandLine.DecoderSettings external && external.PresetId == preset.PresetId) ||
+                            DecoderKey(x) == DecoderKey(item));
+                        if (existing == null) advanced.decoders.Add(item);
+                        else if (preset != null && existing is CUETools.Codecs.CommandLine.DecoderSettings external && string.IsNullOrEmpty(external.PresetId)) external.PresetId = preset.PresetId;
+                    }
 
                     // Reset the ViewModel
                     advanced.encodersViewModel = new EncoderListViewModel(advanced.encoders);
@@ -588,13 +590,6 @@ namespace CUETools.Processor
             return proxy;
         }
 
-        private static CUEToolsCodecsConfig CreateDefaultExternalCodecs()
-        {
-            var defaults = new CUEToolsCodecsConfig();
-            defaults.Init(new List<IAudioEncoderSettings>(), new List<IAudioDecoderSettings>());
-            return defaults;
-        }
-
         private static string EncoderKey(IAudioEncoderSettings value)
         {
             return JsonConvert.SerializeObject(new[] { value.Name, value.Extension, value.Lossless ? "1" : "0" });
@@ -603,12 +598,6 @@ namespace CUETools.Processor
         private static string DecoderKey(IAudioDecoderSettings value)
         {
             return JsonConvert.SerializeObject(new[] { value.Name, value.Extension });
-        }
-
-        private static HashSet<string> LoadRemovedCodecKeys(string json)
-        {
-            try { return new HashSet<string>(JsonConvert.DeserializeObject<string[]>(json ?? "[]") ?? new string[0]); }
-            catch (JsonException) { return new HashSet<string>(); }
         }
 
         private static bool IsEmptyExternalEncoder(IAudioEncoderSettings value)
@@ -626,11 +615,11 @@ namespace CUETools.Processor
                 && (string.IsNullOrWhiteSpace(item.Extension) || string.Equals(item.Extension, "wav", StringComparison.OrdinalIgnoreCase))
                 && string.IsNullOrWhiteSpace(item.Path) && string.IsNullOrWhiteSpace(item.Parameters);
         }
-        // Restrict the replacement to a portable, visible ASCII filename character.
+        // Spaces within a replacement are meaningful and must not be trimmed.
         public static bool IsValidFilenameReplacement(string value)
         {
-            return value != null && value.Length == 1 && value[0] >= '!' && value[0] <= '~'
-                && value[0] != '.' && "<>:\"/\\|?*".IndexOf(value[0]) < 0;
+            return !string.IsNullOrWhiteSpace(value) && value.Length <= 32 &&
+                value.All(ch => ch >= ' ' && ch <= '~' && ch != '.' && "<>:\"/\\|?*".IndexOf(ch) < 0);
         }
         public bool ShouldChooseAlbumMetadata(bool isEncoding, bool editTags, int remainingAlbums, int processedAlbums)
         {

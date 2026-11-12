@@ -56,6 +56,8 @@ namespace JDP
         {
             // Let the actual tab content use the extra space when the window is resized.
             propertyGrid1.Dock = DockStyle.Fill; tabPage7.Padding = new Padding(8);
+            tabControl1.ShowToolTips = true;
+            tabPage3.ToolTipText = "Select an audio format to inspect its encoder, decoder and tagger.";
             listViewFormats.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
             groupBoxFormat.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             comboFormatLosslessEncoder.Anchor = comboFormatLossyEncoder.Anchor = comboFormatDecoder.Anchor = comboBoxFormatTagger.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
@@ -82,7 +84,7 @@ namespace JDP
             btnOK.Top = cancelButton.Top = ClientSize.Height - btnOK.Height - 7;
             grpAudioFilenames.Height += 68; labelLanguage.Top += 68; comboLanguage.Top += 68;
             var label = new Label { Text = "Replace invalid with:", AutoSize = true, Location = new Point(12, 212) };
-            invalidFilenameReplacementBox = new TextBox { Name = "invalidFilenameReplacementBox", MaxLength = 1, Location = new Point(176, 209), Width = 45 };
+            invalidFilenameReplacementBox = new TextBox { Name = "invalidFilenameReplacementBox", MaxLength = 32, Location = new Point(176, 209), Width = 90 };
             replaceInvalidWithSpaceCheckBox = new CheckBox { Name = "replaceInvalidWithSpaceCheckBox", Text = "Replace with space", AutoSize = true, Location = new Point(12, 238) };
             replaceInvalidWithSpaceCheckBox.CheckedChanged += (sender, e) => invalidFilenameReplacementBox.Enabled = !replaceInvalidWithSpaceCheckBox.Checked;
             grpAudioFilenames.Controls.Add(label); grpAudioFilenames.Controls.Add(invalidFilenameReplacementBox); grpAudioFilenames.Controls.Add(replaceInvalidWithSpaceCheckBox);
@@ -90,7 +92,7 @@ namespace JDP
             chooseMetadataForEachAlbumCheckBox = new CheckBox { Name = "chooseMetadataForEachAlbumCheckBox", Text = "Choose metadata for each album", AutoSize = false, Size = new Size(210, 38), Location = new Point(6, 154) };
             groupBoxTagging.Controls.Add(chooseMetadataForEachAlbumCheckBox);
             toolTip1.SetToolTip(chooseMetadataForEachAlbumCheckBox, "Show the metadata selection dialog for every album before encoding, including batches. Cancel stops the batch.");
-            toolTip1.SetToolTip(invalidFilenameReplacementBox, "Replacement for invalid filename characters, such as / or :. Default: _. Use a visible ASCII character valid in Windows filenames.");
+            toolTip1.SetToolTip(invalidFilenameReplacementBox, "Replacement text for invalid filename characters, such as / or :. Spaces are preserved. Default: _.");
         }
 #endif
 		private void frmSettings_Load(object sender, EventArgs e) 
@@ -248,7 +250,7 @@ namespace JDP
             if (!replaceInvalidWithSpaceCheckBox.Checked && !CUEConfig.IsValidFilenameReplacement(invalidFilenameReplacementBox.Text))
             {
                 DialogResult = DialogResult.None;
-                MessageBox.Show(this, "Choose one visible ASCII character that is valid in Windows filenames, such as _, comma, or hyphen.", "Invalid replacement", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(this, "Choose 1 to 32 valid ASCII characters, such as _, comma, or  - . Spaces around the replacement are preserved.", "Invalid replacement", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 invalidFilenameReplacementBox.Focus(); return;
             }
             _config.replaceInvalidWithSpace = replaceInvalidWithSpaceCheckBox.Checked;
@@ -625,7 +627,7 @@ namespace JDP
 		private void buttonEncoderDelete_Click(object sender, EventArgs e)
 		{
 			var encoder = encodersBindingSource.Current as AudioEncoderSettingsViewModel;
-			if (encoder == null || !encoder.CanBeDeleted)
+			if (encoder == null || !encoder.CanBeRemoved)
 				return;
             foreach (var format in _config.formats.Values)
             {
@@ -643,7 +645,7 @@ namespace JDP
         private void buttonDecoderDelete_Click(object sender, EventArgs e)
         {
             var decoder = bindingSourceDecoders.Current as AudioDecoderSettingsViewModel;
-            if (decoder == null || !decoder.CanBeDeleted)
+            if (decoder == null || !decoder.CanBeRemoved)
                 return;
             foreach (var format in _config.formats.Values)
                 if (format.decoder == decoder) format.decoder = null;

@@ -129,6 +129,7 @@ namespace CUETools.Codecs
         }
 
         public bool CanBeDeleted => Settings is CommandLine.EncoderSettings;
+        public bool CanBeRemoved => Settings is CommandLine.EncoderSettings item && string.IsNullOrEmpty(item.PresetId);
 
         public bool IsValid =>
                (Settings != null)

@@ -14,6 +14,9 @@ public class FilenameSpaceReplacementTests
         Assert.IsFalse(config.replaceInvalidWithSpace);
         config.invalidFilenameReplacement = ",";
         Assert.AreEqual("Six, eight", config.CleanseString("Six/ eight"));
+        config.invalidFilenameReplacement = " - ";
+        Assert.AreEqual("Artist - Title", config.CleanseString("Artist/Title"));
+        config.invalidFilenameReplacement = ",";
         config.replaceInvalidWithSpace = true;
         Assert.AreEqual("Six  eight", config.CleanseString("Six/ eight"));
         config.replaceSpaces = true;
@@ -32,12 +35,14 @@ public class FilenameSpaceReplacementTests
         try
         {
             string app = Path.Combine(dir, "app.exe");
-            var config = new CUEConfig { invalidFilenameReplacement = ",", replaceInvalidWithSpace = true };
+            var config = new CUEConfig { invalidFilenameReplacement = " - ", replaceInvalidWithSpace = true };
             var writer = new SettingsWriter("Test", "settings.txt", app); config.Save(writer); writer.Close();
             var loaded = new CUEConfig(); loaded.Load(new SettingsReader("Test", "settings.txt", app));
             Assert.IsTrue(loaded.replaceInvalidWithSpace);
-            Assert.AreEqual(",", loaded.invalidFilenameReplacement);
+            Assert.AreEqual(" - ", loaded.invalidFilenameReplacement);
             Assert.AreEqual("a b", loaded.CleanseString("a/b"));
+            loaded.replaceInvalidWithSpace = false;
+            Assert.AreEqual("a - b", loaded.CleanseString("a/b"));
             writer = new SettingsWriter("Test", "settings.txt", app); writer.Save("InvalidFilenameReplacement", ","); writer.Close();
             loaded.Load(new SettingsReader("Test", "settings.txt", app));
             Assert.IsFalse(loaded.replaceInvalidWithSpace);

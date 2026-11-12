@@ -89,6 +89,7 @@ namespace CUETools.Codecs
         public string DotExtension => "." + Extension;
 
         public bool CanBeDeleted => Settings is CommandLine.DecoderSettings;
+        public bool CanBeRemoved => Settings is CommandLine.DecoderSettings item && string.IsNullOrEmpty(item.PresetId);
 
         public bool IsValid =>
                (Settings != null)

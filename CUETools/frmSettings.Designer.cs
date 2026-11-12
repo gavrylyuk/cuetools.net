@@ -1158,7 +1158,7 @@ namespace JDP
             // 
             // buttonEncoderDelete
             // 
-            this.buttonEncoderDelete.DataBindings.Add(new System.Windows.Forms.Binding("Enabled", this.encodersBindingSource, "CanBeDeleted", true));
+            this.buttonEncoderDelete.DataBindings.Add(new System.Windows.Forms.Binding("Enabled", this.encodersBindingSource, "CanBeRemoved", true));
             resources.ApplyResources(this.buttonEncoderDelete, "buttonEncoderDelete");
             this.buttonEncoderDelete.Name = "buttonEncoderDelete";
             this.buttonEncoderDelete.UseVisualStyleBackColor = true;
@@ -1262,7 +1262,7 @@ namespace JDP
             // 
             // buttonDecoderDelete
             // 
-            this.buttonDecoderDelete.DataBindings.Add(new System.Windows.Forms.Binding("Enabled", this.bindingSourceDecoders, "CanBeDeleted", true));
+            this.buttonDecoderDelete.DataBindings.Add(new System.Windows.Forms.Binding("Enabled", this.bindingSourceDecoders, "CanBeRemoved", true));
             resources.ApplyResources(this.buttonDecoderDelete, "buttonDecoderDelete");
             this.buttonDecoderDelete.Name = "buttonDecoderDelete";
             this.buttonDecoderDelete.UseVisualStyleBackColor = true;
