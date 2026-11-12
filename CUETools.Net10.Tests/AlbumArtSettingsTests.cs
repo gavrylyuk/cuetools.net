@@ -45,4 +45,49 @@ public class AlbumArtSettingsTests
         image.Save(expected, codec, parameters);
         CollectionAssert.AreEqual(expected.ToArray(), actual.ToArray());
     }
+    [TestMethod]
+    public void SelectedCoverReplacesExistingArtForTheCurrentAlbum()
+    {
+        var cue = new CUESheet(new CUEConfig());
+        using var oldImage = new Bitmap(4, 4);
+        using var selectedImage = new Bitmap(6, 5);
+        using var oldBytes = new MemoryStream();
+        using var selectedBytes = new MemoryStream();
+        oldImage.Save(oldBytes, ImageFormat.Png); selectedImage.Save(selectedBytes, ImageFormat.Png);
+        cue.AlbumArt.Add(new TagLib.Picture(new TagLib.ByteVector(oldBytes.ToArray())));
+        var selected = new TagLib.Picture(new TagLib.ByteVector(selectedBytes.ToArray()));
+        cue.UseSelectedAlbumArt(selected);
+        Assert.AreEqual(1, cue.AlbumArt.Count);
+        Assert.AreSame(selected, cue.AlbumArt[0]);
+        Assert.AreEqual(TagLib.PictureType.FrontCover, cue.AlbumArt[0].Type);
+        cue.Action = CUEAction.Encode;
+        cue.LoadAndResizeAlbumArt();
+        Assert.AreSame(selected, cue.AlbumArt[0], "Explicit cover must not be replaced by another source.");
+        CollectionAssert.AreEqual(selectedBytes.ToArray(), cue.AlbumArt[0].Data.Data);
+    }
+    [TestMethod]
+    public void MetadataDialogOffersCoverPicker()
+    {
+        Exception failure = null;
+        var thread = new System.Threading.Thread(() => {
+            try
+            {
+                var dialog = new JDP.frmChoice { CUE = new CUESheet(new CUEConfig()), config = new CUEConfig() };
+                using (dialog)
+                {
+                    dialog.Choices = Array.Empty<object>();
+                    var buttons = dialog.Controls.Find("chooseCoverButton", true);
+                    Assert.AreEqual(1, buttons.Length);
+                    Assert.IsTrue(buttons[0].Text.StartsWith("Choose cover"));
+                    Assert.IsNull(dialog.SelectedCover);
+                }
+            }
+            catch (Exception error) { failure = error; }
+        });
+        thread.IsBackground = true;
+        thread.SetApartmentState(System.Threading.ApartmentState.STA);
+        thread.Start();
+        Assert.IsTrue(thread.Join(TimeSpan.FromSeconds(20)));
+        if (failure != null) throw new AssertFailedException("Metadata cover picker failed", failure);
+    }
 }

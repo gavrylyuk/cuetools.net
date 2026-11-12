@@ -24,6 +24,45 @@ namespace JDP
 
         public CUESheet CUE;
         public CUEConfig config;
+#if NET10_0_OR_GREATER
+        public TagLib.IPicture SelectedCover { get; private set; }
+        private Button chooseCoverButton;
+
+        private void AddCoverChooser()
+        {
+            if (chooseCoverButton != null) return;
+            chooseCoverButton = new Button { Text = "Choose cover…", AutoEllipsis = true, Dock = DockStyle.Fill, Name = "chooseCoverButton" };
+            chooseCoverButton.Click += (sender, args) =>
+            {
+                using (var picker = new OpenFileDialog { Title = "Choose album cover", Filter = "Image files|*.jpg;*.jpeg;*.png;*.bmp;*.gif", CheckFileExists = true, InitialDirectory = CUE?.InputPath == null ? "" : Path.GetDirectoryName(CUE.InputPath) })
+                {
+                    if (picker.ShowDialog(this) != DialogResult.OK) return;
+                    try
+                    {
+                        using (var image = Image.FromFile(picker.FileName))
+                        {
+                            var picture = new TagLib.Picture(picker.FileName);
+                            var preview = new Bitmap(image);
+                            SelectedCover = picture;
+                            pictureBox1.ImageLocation = null;
+                            var previous = pictureBox1.Image;
+                            pictureBox1.Image = preview;
+                            if (previous != null) previous.Dispose();
+                            pictureBox1.Show();
+                        }
+                        chooseCoverButton.Text = "Cover: " + Path.GetFileName(picker.FileName);
+                        toolTip1.SetToolTip(chooseCoverButton, picker.FileName);
+                    }
+                    catch (Exception error)
+                    {
+                        MessageBox.Show(this, "Could not load the selected image: " + error.Message, "Album cover", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
+            };
+            tableLayoutPanel2.Controls.Add(chooseCoverButton, 2, 0);
+            toolTip1.SetToolTip(chooseCoverButton, "Choose a local image for this album. Leave unchanged to use the existing artwork.");
+        }
+#endif
 
         private bool ctdb;
         private CTDBMetadataSearch metadataSearch;
@@ -103,6 +142,9 @@ namespace JDP
                     AddItem(i);
                 if (CUE != null)
                 {
+#if NET10_0_OR_GREATER
+                    AddCoverChooser();
+#endif
                     textBox1.Hide();
                     pictureBox1.Hide();
                     tableLayoutPanelMeta.Show();
@@ -260,6 +302,16 @@ namespace JDP
                     pictureBox1.Image = null;
                 }
                 pictureBox1.ImageLocation = null;
+#if NET10_0_OR_GREATER
+                if (SelectedCover != null)
+                {
+                    using (var stream = new MemoryStream(SelectedCover.Data.Data))
+                    using (var image = Image.FromStream(stream))
+                        pictureBox1.Image = new Bitmap(image);
+                    pictureBox1.Show();
+                }
+                else
+#endif
                 if (r.metadata.AlbumArt.Count > 0 || r.cover != null)
                 {
                     pictureBox1.Show();

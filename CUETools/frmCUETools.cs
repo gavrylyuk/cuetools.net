@@ -863,6 +863,10 @@ namespace JDP
                                     _choiceHeight = dlg.Height;
                                     _choiceWidth = dlg.Width;
                                 }
+#if NET10_0_OR_GREATER
+                                if (dlgRes == DialogResult.OK && dlg.SelectedCover != null)
+                                    cueSheet.UseSelectedAlbumArt(dlg.SelectedCover);
+#endif
                                 if (dlgRes == DialogResult.Cancel)
                                 {
                                     cueSheet.Close();

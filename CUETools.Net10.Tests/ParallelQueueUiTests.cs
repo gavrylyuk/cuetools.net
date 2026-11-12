@@ -67,4 +67,41 @@ public class ParallelQueueUiTests
         if(failure!=null) throw new AssertFailedException("Status link failed",failure);
     }
 
+    [TestMethod]
+    public void QueueFollowsNewRowsUnlessUserScrolledUp()
+    {
+        Exception failure = null;
+        var thread = new Thread(() => {
+            string dir = Path.Combine(Path.GetTempPath(), "cuetools-scroll-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(dir);
+            try {
+                string path = Path.Combine(dir, "album.cue"); File.WriteAllText(path, "");
+                using var batch = new ParallelConversionBatch(4, dir); batch.SetPending(new[] { path });
+                var type = Assembly.Load("CUETools").GetType("JDP.ParallelQueueForm", true);
+                using var form = (Form)Activator.CreateInstance(type, BindingFlags.Instance | BindingFlags.NonPublic, null, new object[] { batch, (Action)(() => { }), (Action<bool>)(_ => { }) }, null);
+                form.ShowInTaskbar = false; form.StartPosition = FormStartPosition.Manual; form.Location = new System.Drawing.Point(-32000, -32000); form.Show(); Application.DoEvents();
+                var refresh = type.GetMethod("RefreshProgress", BindingFlags.Instance | BindingFlags.NonPublic);
+                var grid = (DataGridView)type.GetField("grid", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(form);
+                var album = batch.Album(path);
+                for (int i = 0; i < 40; i++) album.Tracks.Add(new ParallelTrackProgress { Output = Path.Combine(dir, i + ".flac"), Stage = "Encoding" });
+                refresh.Invoke(form, null);
+                Assert.IsTrue(grid.Rows[grid.Rows.Count - 1].Displayed, "New rows should scroll into view.");
+                grid.FirstDisplayedScrollingRowIndex = 0;
+                album.Tracks.Add(new ParallelTrackProgress { Output = Path.Combine(dir, "next.flac"), Stage = "Queued" });
+                refresh.Invoke(form, null);
+                Assert.AreEqual(0, grid.FirstDisplayedScrollingRowIndex, "Manual scrolling must not be interrupted.");
+                grid.FirstDisplayedScrollingRowIndex = grid.Rows.Count - 1;
+                album.Tracks.Add(new ParallelTrackProgress { Output = Path.Combine(dir, "last.flac"), Stage = "Queued" });
+                refresh.Invoke(form, null);
+                Assert.IsTrue(grid.Rows[grid.Rows.Count - 1].Displayed, "Following resumes when the user returns to the end.");
+                form.Hide();
+                album.Tracks.Add(new ParallelTrackProgress { Output = Path.Combine(dir, "hidden.flac"), Stage = "Queued" });
+                refresh.Invoke(form, null); form.Show(); Application.DoEvents();
+                Assert.IsTrue(grid.Rows[grid.Rows.Count - 1].Displayed, "Following continues after reopening the queue.");
+                batch.Finish();
+            } catch (Exception error) { failure = error; } finally { Directory.Delete(dir, true); }
+        });
+        thread.IsBackground = true; thread.SetApartmentState(ApartmentState.STA); thread.Start(); Assert.IsTrue(thread.Join(TimeSpan.FromSeconds(20)), "Queue scroll test timed out.");
+        if (failure != null) throw new AssertFailedException("Queue scroll failed", failure);
+    }
 }

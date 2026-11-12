@@ -128,6 +128,7 @@ namespace JDP
         private readonly Label summary = new Label(), source = new Label();
         private readonly Button pause = new Button(), stopAll = new Button(), deleteAll = new Button(), stopAlbum = new Button(), close = new Button();
         private int renderIndex;
+        private bool scrollOnShow;
         private readonly Font albumFont;
         private readonly Timer timer = new Timer { Interval = 200 };
         internal ParallelQueueForm(ParallelConversionBatch batch, Action refreshOwner, Action<bool> stop)
@@ -154,6 +155,7 @@ namespace JDP
             layout.Controls.Add(summary, 0, 0); layout.Controls.Add(source, 0, 1); layout.Controls.Add(grid, 0, 2); layout.Controls.Add(note, 0, 3); layout.Controls.Add(buttons, 0, 4); Controls.Add(layout);
             var tips = new ToolTip(); Disposed += (s, e) => tips.Dispose(); UiHelp.Attach(this, tips);
             tips.SetToolTip(grid, "Review albums and track stages; hover a track for its output path."); tips.SetToolTip(pause, "Pause or resume the batch."); tips.SetToolTip(stopAlbum, "Stop the current album and continue to the next."); tips.SetToolTip(stopAll, "Stop the batch and keep completed albums."); tips.SetToolTip(deleteAll, "Stop and roll back this batch; approved overwritten files are restored."); tips.SetToolTip(close, "Hide the queue while it runs, or close it when finished.");
+            VisibleChanged += (s, e) => { if (Visible && scrollOnShow) ScrollToEnd(); };
             timer.Tick += (s, e) => RefreshProgress(); timer.Start(); RefreshProgress();
         }
         internal static Color StatusLinkColor(bool dark, bool highContrast) => highContrast ? SystemColors.HotTrack : dark ? Color.WhiteSmoke : Color.Black;
@@ -180,6 +182,9 @@ namespace JDP
             source.Text = !string.IsNullOrEmpty(batch.CleanupError) ? "Some outputs could not be removed. See cleanup details below." : current != null
                 ? "Source: " + Path.GetFileName(current.Input) + " · decode / disc verification " + current.DecodePercent.ToString("P0") + " · " + current.Stage
                 : batch.Finished ? "Review album and track results below." : "Preparing the album queue...";
+            // Follow newly added rows only while the user is already viewing the end.
+            int previousRows = grid.Rows.Count;
+            bool followEnd = previousRows == 0 || grid.FirstDisplayedScrollingRowIndex < 0 || grid.Rows[previousRows - 1].Displayed;
             renderIndex = 0;
             foreach (var album in albums)
             {
@@ -187,8 +192,20 @@ namespace JDP
                 foreach (var track in album.Tracks) Row(album.Input + "|" + track.Output, "    " + Path.GetFileName(track.Output), track.Stage, track.Stage == "Encoding" && track.Percent == 0 ? "—" : track.Percent.ToString("P0"), track.Error ?? "", track.DisplayOutput ?? track.Output);
             }
             if (!string.IsNullOrEmpty(batch.CleanupError)) Row("cleanup", "Cleanup", "Needs attention", "", batch.CleanupError);
+            if (followEnd && grid.Rows.Count > previousRows)
+            {
+                scrollOnShow = true;
+                if (grid.IsHandleCreated && grid.Visible) ScrollToEnd();
+            }
             pause.Text = batch.Paused ? "Resume all" : "Pause all"; pause.Enabled = stopAll.Enabled = deleteAll.Enabled = !batch.Finished; stopAlbum.Enabled = !batch.Finished && batch.ActiveSession != null; close.Text = batch.Finished ? "Close" : "Hide";
             refreshOwner();
+        }
+        private void ScrollToEnd()
+        {
+            if (!grid.IsHandleCreated || !grid.Visible || grid.Rows.Count == 0) return;
+            int displayed = Math.Max(1, grid.DisplayedRowCount(false));
+            grid.FirstDisplayedScrollingRowIndex = Math.Max(0, grid.Rows.Count - displayed);
+            scrollOnShow = false;
         }
         protected override void Dispose(bool disposing) { if (disposing) { timer.Dispose(); albumFont?.Dispose(); } base.Dispose(disposing); }
     }

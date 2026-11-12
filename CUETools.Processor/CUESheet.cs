@@ -1809,6 +1809,16 @@ namespace CUETools.Processor
             // TODO: It should also be set when assigning a DataTrack!!!
         }
 
+        public void UseSelectedAlbumArt(TagLib.IPicture picture)
+        {
+            if (picture == null) throw new ArgumentNullException(nameof(picture));
+            picture.Type = TagLib.PictureType.FrontCover;
+            _albumArt.Clear();
+            _albumArt.Add(picture);
+            // Keep the explicit choice instead of replacing it with embedded or online art.
+            _hasEmbeddedArtwork = true;
+        }
+
         public void LoadAndResizeAlbumArt()
         {
             if (Action != CUEAction.Encode)

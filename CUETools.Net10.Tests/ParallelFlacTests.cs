@@ -53,10 +53,11 @@ public class ParallelFlacTests
         }
         string path=Path.Combine(root,"album.cue");File.WriteAllText(path,cue);return path;
     }
-    private string[] Convert(CUEConfig config,string input,string destination,bool parallel,CUEStyle style,int writeOffset)
+    private string[] Convert(CUEConfig config,string input,string destination,bool parallel,CUEStyle style,int writeOffset, TagLib.IPicture selectedCover = null)
     {
         Directory.CreateDirectory(destination);
         var cue=new CUESheet(config){Action=CUEAction.Encode,OutputStyle=style,WriteOffset=writeOffset};cue.Open(input);
+        if (selectedCover != null) { cue.UseSelectedAlbumArt(selectedCover); cue.LoadAndResizeAlbumArt(); }
         string output=Path.Combine(destination,"album.cue");cue.GenerateFilenames(AudioEncoderType.Lossless,"flac",output);
         var finals=cue.DestPaths.ToArray();
         try
@@ -185,6 +186,24 @@ public class ParallelFlacTests
         Assert.AreEqual(expected,Path.GetFileName(files[0]));Assert.IsTrue(File.Exists(files[0]));
         StringAssert.Contains(File.ReadAllText(Path.Combine(destination,"album.cue")),"\"" + expected + "\"");
         using var tagged=TagLib.File.Create(files[0]);Assert.AreEqual("6/8 - 7/8",tagged.Tag.Title);
+    }
+    [TestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
+    public void SelectedCoverIsEmbeddedInOutputTracks(bool parallel)
+    {
+        var config = Config(); string input = Cue(config, "wav", false);
+        using var bitmap = new System.Drawing.Bitmap(8, 8);
+        bitmap.SetPixel(0, 0, System.Drawing.Color.Red);
+        using var stream = new MemoryStream(); bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+        var cover = new TagLib.Picture(new TagLib.ByteVector(stream.ToArray())) { MimeType = "image/png" };
+        string[] files = Convert(config, input, Path.Combine(root, "cover-output"), parallel, CUEStyle.GapsAppended, 0, cover);
+        foreach (string file in files)
+        {
+            using var tag = TagLib.File.Create(file);
+            Assert.AreEqual(1, tag.Tag.Pictures.Length);
+            CollectionAssert.AreEqual(stream.ToArray(), tag.Tag.Pictures[0].Data.Data);
+        }
     }
     [TestMethod]
     public void EncoderFailurePublishesNothingAndReleasesTemporaryFiles()
