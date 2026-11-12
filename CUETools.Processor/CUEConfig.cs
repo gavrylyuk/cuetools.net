@@ -570,14 +570,16 @@ namespace CUETools.Processor
         private static bool IsEmptyExternalEncoder(IAudioEncoderSettings value)
         {
             var item = value as CUETools.Codecs.CommandLine.EncoderSettings;
-            return item != null && string.IsNullOrWhiteSpace(item.Name) && string.IsNullOrWhiteSpace(item.Extension)
+            return item != null && string.IsNullOrWhiteSpace(item.Name)
+                && (string.IsNullOrWhiteSpace(item.Extension) || string.Equals(item.Extension, "wav", StringComparison.OrdinalIgnoreCase))
                 && string.IsNullOrWhiteSpace(item.Path) && string.IsNullOrWhiteSpace(item.Parameters)
                 && string.IsNullOrWhiteSpace(item.SupportedModes) && string.IsNullOrWhiteSpace(item.EncoderMode);
         }
         private static bool IsEmptyExternalDecoder(IAudioDecoderSettings value)
         {
             var item = value as CUETools.Codecs.CommandLine.DecoderSettings;
-            return item != null && string.IsNullOrWhiteSpace(item.Name) && string.IsNullOrWhiteSpace(item.Extension)
+            return item != null && string.IsNullOrWhiteSpace(item.Name)
+                && (string.IsNullOrWhiteSpace(item.Extension) || string.Equals(item.Extension, "wav", StringComparison.OrdinalIgnoreCase))
                 && string.IsNullOrWhiteSpace(item.Path) && string.IsNullOrWhiteSpace(item.Parameters);
         }
         // Restrict the replacement to a portable, visible ASCII filename character.

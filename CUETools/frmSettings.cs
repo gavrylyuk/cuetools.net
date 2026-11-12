@@ -65,6 +65,7 @@ namespace JDP
             groupBox4.Anchor = groupBox5.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             tableLayoutPanel2.SetColumnSpan(chkEncodeWhenZeroOffset, 2);
             chkEncodeWhenZeroOffset.Dock = DockStyle.Fill;
+            chkEncodeWhenZeroOffset.RightToLeft = RightToLeft.Yes;
             grpHDCD.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupBoxExternalEncoder.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             tableLayoutPanel4.RowStyles[0].SizeType = tableLayoutPanel5.RowStyles[0].SizeType = SizeType.Absolute;
