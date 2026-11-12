@@ -47,6 +47,7 @@ namespace JDP
         {
             foreach (Control control in parent.Controls)
             {
+                if (control is CUEControls.FileSystemTreeView) continue;
                 string hint = Hint(control);
                 if (hint != null && string.IsNullOrWhiteSpace(tips.GetToolTip(control))) tips.SetToolTip(control, hint);
                 AddTips(control, tips);
@@ -56,7 +57,6 @@ namespace JDP
         {
             switch (c.Name)
             {
-                case "fileSystemTreeView1": return "Browse local folders, network locations, and the local database. Check items to process a batch.";
                 case "btnConvert": return "Start the selected action for the input or checked items.";
                 case "btnStop": return "Stop the current operation.";
                 case "btnPause": return "Pause the current operation.";

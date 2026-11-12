@@ -220,6 +220,13 @@ namespace CUEControls
 		public event FileSystemTreeViewNodeExpandHandler NodeExpand;
 		#endregion
 
+#if NET10_0_OR_GREATER
+        // Prevent Windows from showing automatic full-label tooltips for truncated nodes.
+        protected override CreateParams CreateParams
+        {
+            get { var parameters = base.CreateParams; parameters.Style |= 0x0080; return parameters; } // TVS_NOTOOLTIPS
+        }
+#endif
 		/// <summary>
 		/// Create the file system tree view control
 		/// </summary>
