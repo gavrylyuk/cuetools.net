@@ -2206,6 +2206,11 @@ namespace CUETools.Processor
             _outputFormat = format;
             _outputPath = outputPath;
 
+            bool preserveLongNames = false;
+#if NET10_0_OR_GREATER
+            preserveLongNames = ParallelBatch != null;
+#endif
+
             string extension = "." + format;
             string filename;
             int iTrack;
@@ -2233,13 +2238,13 @@ namespace CUETools.Processor
 
             for (int maxLen = 255; maxLen >= 8; maxLen--)
             {
-                ArLogFileName = General.ReplaceMultiple(_config.ArLogFilenameFormat, vars, "unique", CheckIfFileExists, maxLen);
+                ArLogFileName = General.ReplaceMultiple(_config.ArLogFilenameFormat, vars, "unique", CheckIfFileExists, preserveLongNames ? -1 : maxLen);
                 if (ArLogFileName == "" || ArLogFileName == null)
                 {
                     ArLogFileName = "ar.log";
                     break;
                 }
-                 if (Path.Combine(OutputDir, ArLogFileName).Length < 255 || OutputDir.StartsWith("\\\\?\\"))
+                 if (preserveLongNames || Path.Combine(OutputDir, ArLogFileName).Length < 255 || OutputDir.StartsWith("\\\\?\\"))
                     break;
             }
 
@@ -2279,13 +2284,13 @@ namespace CUETools.Processor
                     filename = "";
                     for (int maxLen = 255; maxLen >= 8; maxLen--)
                     {
-                        filename = General.ReplaceMultiple(_config.trackFilenameFormat, vars, maxLen);
+                        filename = General.ReplaceMultiple(_config.trackFilenameFormat, vars, preserveLongNames ? -1 : maxLen);
                         if (filename == "" || filename == null)
                         {
                             filename = vars["tracknumber"];
                             break;
                         }
-                        if (OutputDir.Length + filename.Length < 255 || OutputDir.StartsWith("\\\\?\\"))
+                        if (preserveLongNames || OutputDir.Length + filename.Length < 255 || OutputDir.StartsWith("\\\\?\\"))
                             break;
                     }
 

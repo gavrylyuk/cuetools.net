@@ -109,6 +109,55 @@ public class ParallelFlacTests
         Assert.AreEqual(0,Directory.GetDirectories(root,"cuetools-pcm-*").Length);
     }
     [TestMethod]
+    public void ParallelConversionPreservesFullTrackNamesAndCueReferencesInLongFolders()
+    {
+        var config=Config();config.keepOriginalFilenames=false;config.filenamesANSISafe=true;config.removeSpecial=false;config.replaceSpaces=false;
+        string input=Cue(config,"wav",false);
+        const string longTitle="A complete track title, with punctuation that must never be shortened";
+        string text=File.ReadAllText(input);
+        for(int i=1;i<=3;i++) text=text.Replace("Song "+i,longTitle+" "+i);
+        File.WriteAllText(input,text);
+        string destination=Path.Combine(root,new string('a',95),new string('b',90));Directory.CreateDirectory(destination);
+        string output=Path.Combine(destination,"album.cue");
+        var cue=new CUESheet(config){Action=CUEAction.Encode,OutputStyle=CUEStyle.GapsAppended};cue.Open(input);
+        try
+        {
+            using var batch=new ParallelConversionBatch(2,root);cue.ParallelBatch=batch;
+            cue.GenerateFilenames(AudioEncoderType.Lossless,"flac",output);
+            var finalPaths=cue.DestPaths.ToArray();
+            for(int i=0;i<3;i++) Assert.AreEqual((i+1).ToString("D2")+". "+longTitle+" "+(i+1)+".flac",Path.GetFileName(finalPaths[i]));
+            using(var staged=new ParallelAlbumOutput(batch,input,destination,finalPaths.Append(output),cue.SourcePaths,Array.Empty<string>()))
+            {
+                cue.GenerateFilenames(AudioEncoderType.Lossless,"flac",Path.Combine(staged.StageDirectory,"album.cue"));
+                for(int i=0;i<3;i++) Assert.AreEqual(Path.GetFileName(finalPaths[i]),Path.GetFileName(cue.DestPaths[i]));
+                Assert.IsTrue(cue.DestPaths.Any(path=>path.Length>260));
+                using var session=new ParallelFlacSession(batch,config,input,(long)cue.TOC.AudioLength*588);
+                cue.ParallelSession=session;
+                try{cue.Go();session.Checkpoint();staged.Commit();session.MarkCommitted();}finally{cue.ParallelSession=null;}
+            }
+            batch.Finish();string resultCue=File.ReadAllText(output);
+            foreach(string path in finalPaths){Assert.IsTrue(File.Exists(path),"Missing full output filename: "+path);StringAssert.Contains(resultCue,"\""+Path.GetFileName(path)+"\"");}
+        }
+        finally{cue.ParallelBatch=null;cue.Close();}
+    }
+    [TestMethod]
+    [DataRow(true)]
+    [DataRow(false)]
+    public void FilenameCleaningKeepsCommasAndReplacesInvalidWindowsCharacters(bool forceAnsi)
+    {
+        var config=Config();config.filenamesANSISafe=forceAnsi;config.removeSpecial=false;config.replaceSpaces=false;
+        Assert.AreEqual("First, second_ third_",config.CleanseString("First, second: third?"));
+        config.replaceSpaces=true;
+        Assert.AreEqual("First,_second",config.CleanseString("First, second"));
+    }
+    [TestMethod]
+    public void ExplicitSpecialCharacterRemovalRespectsCommaException()
+    {
+        var config=Config();config.filenamesANSISafe=true;config.removeSpecial=true;config.replaceSpaces=false;
+        config.specialExceptions="-()";Assert.AreEqual("First_ second",config.CleanseString("First, second"));
+        config.specialExceptions="-(),";Assert.AreEqual("First, second",config.CleanseString("First, second"));
+    }
+    [TestMethod]
     public void EncoderFailurePublishesNothingAndReleasesTemporaryFiles()
     {
         var config=Config();string input=Cue(config,"wav",false);((CUETools.Codecs.CommandLine.EncoderSettings)config.formats["flac"].encoderLossless.Settings).Parameters="--cuetools-invalid-test-option %I -o %O";
