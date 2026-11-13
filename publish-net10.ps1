@@ -19,6 +19,15 @@ try {
         $appOutput = Join-Path $distribution $appName
         & dotnet publish $apps[$appName][0] -c $Configuration -f $apps[$appName][1] -r win-x64 --self-contained $SelfContained.IsPresent.ToString().ToLowerInvariant() -p:PublishTrimmed=false -p:PublishSingleFile=false -o $appOutput --nologo
         if ($LASTEXITCODE -ne 0) { throw "Publishing $appName failed with exit code $LASTEXITCODE" }
+        if (-not $Experimental) {
+            # A reused preview directory must not change the release profile or branding.
+            foreach ($stale in @('ui_preview', 'parallel_experiment', 'PREVIEW-README.txt')) {
+                Remove-Item -LiteralPath (Join-Path $appOutput $stale) -Force -ErrorAction SilentlyContinue
+            }
+            if (Test-Path -LiteralPath (Join-Path $appOutput 'CUE Tools')) {
+                throw "Personal profile data exists in the publish directory; move it before packaging: $appOutput"
+            }
+        }
         if ($Experimental) { Set-Content -LiteralPath (Join-Path $appOutput 'parallel_experiment') -Value 'Parallel FLAC preview: isolated settings and single-instance identity.' }
         $plugins = Join-Path $appOutput 'plugins'
         New-Item -ItemType Directory -Path $plugins -Force | Out-Null
