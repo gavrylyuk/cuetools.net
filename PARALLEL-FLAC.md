@@ -1,12 +1,10 @@
-# Experimental parallel FLAC conversion
+# Parallel FLAC conversion
 
-Branch: `feature/parallel-flac-queue`. Do not merge into `cuetools-only` until manual testing is accepted.
+The Windows release contains both original and parallel conversion modes. It uses the standard CUETools settings and local database. The .NET runtime is included in the installer. Windows x64 is the tested platform; Wine has not been tested.
 
-## Try the preview
+## Use parallel conversion
 
-Install `CUETools-2.2.7.0-parallel-preview-win-x64-Setup.exe`. It uses its own installation directory, single-instance identity, settings, local database, and network-location settings. The .NET runtime is included. Windows x64 is the tested platform; Wine has not been tested.
-
-Select **Encode > Tracks > Lossless > flac > flac.exe**, with the default script. Select a CUE, a folder containing CUEs, or multiple CUEs. Click **Go**, choose a local temporary folder and start with **2 workers**. Original mode remains available in the options dialog. The selected external FLAC executable must be installed/configured as usual.
+Select **Encode > Tracks > Lossless > flac > flac.exe**, with the default script. Select a CUE, a folder containing CUEs, or multiple CUEs. Click **Go**, choose a local temporary folder and start with **4 workers**. Original mode remains available in the options dialog. The selected external FLAC executable must be installed/configured as usual.
 
 The decoder and disc verification remain sequential to preserve disc offsets, gaps and AccurateRip/CTDB ordering. Tracks are temporarily spooled to WAV, then encoded concurrently. Each output is decoded internally and its PCM is checked before album tagging and publication. Temporary disk capacity must accommodate several uncompressed tracks; increasing workers also increases disk and CPU load. Albums run in order using the same worker budget.
 
